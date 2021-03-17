@@ -27,7 +27,7 @@
                 <configuration>
                     <archive>
                         <manifestEntries>
-                            <Automatic-Module-Name>com.powsybl.network_hypothesis</Automatic-Module-Name>
+                            <Automatic-Module-Name>com.powsybl.network.hypothesis</Automatic-Module-Name>
                         </manifestEntries>
                     </archive>
                 </configuration>
