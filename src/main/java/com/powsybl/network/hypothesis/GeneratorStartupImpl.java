@@ -16,15 +16,18 @@ public class GeneratorStartupImpl extends AbstractExtension<Generator> implement
 
     private float predefinedActivePowerSetpoint;
 
+    private float startUpCost;
+
     private float marginalCost;
 
     private float plannedOutageRate;
 
     private float forcedOutageRate;
 
-    public GeneratorStartupImpl(Generator generator, float predefinedActivePowerSetpoint, float marginalCost, float plannedOutageRate, float forcedOutageRate) {
+    public GeneratorStartupImpl(Generator generator, float predefinedActivePowerSetpoint, float startUpCost, float marginalCost, float plannedOutageRate, float forcedOutageRate) {
         super(generator);
         this.predefinedActivePowerSetpoint = predefinedActivePowerSetpoint;
+        this.startUpCost = startUpCost;
         this.marginalCost = marginalCost;
         this.plannedOutageRate = plannedOutageRate;
         this.forcedOutageRate = forcedOutageRate;
@@ -38,6 +41,17 @@ public class GeneratorStartupImpl extends AbstractExtension<Generator> implement
     @Override
     public GeneratorStartupImpl setPredefinedActivePowerSetpoint(float predefinedActivePowerSetpoint) {
         this.predefinedActivePowerSetpoint = predefinedActivePowerSetpoint;
+        return this;
+    }
+
+    @Override
+    public float getStartUpCost() {
+        return startUpCost;
+    }
+
+    @Override
+    public GeneratorStartup setStartUpCost(float startUpCost) {
+        this.startUpCost = startUpCost;
         return this;
     }
 

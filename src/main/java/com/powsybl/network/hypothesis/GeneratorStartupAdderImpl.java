@@ -14,13 +14,15 @@ import com.powsybl.iidm.network.Generator;
  */
 public class GeneratorStartupAdderImpl extends AbstractExtensionAdder<Generator, GeneratorStartup> implements GeneratorStartupAdder {
 
-    private float predefinedActivePowerSetpoint;
+    private float predefinedActivePowerSetpoint = Float.NaN;
 
-    private float marginalCost;
+    private float startUpCost = Float.NaN;
 
-    private float plannedOutageRate;
+    private float marginalCost = Float.NaN;
 
-    private float forcedOutageRate;
+    private float plannedOutageRate = Float.NaN;
+
+    private float forcedOutageRate = Float.NaN;
 
     public GeneratorStartupAdderImpl(Generator generator) {
         super(generator);
@@ -28,12 +30,18 @@ public class GeneratorStartupAdderImpl extends AbstractExtensionAdder<Generator,
 
     @Override
     protected GeneratorStartup createExtension(Generator extendable) {
-        return new GeneratorStartupImpl(extendable, predefinedActivePowerSetpoint, marginalCost, plannedOutageRate, forcedOutageRate);
+        return new GeneratorStartupImpl(extendable, predefinedActivePowerSetpoint, startUpCost, marginalCost, plannedOutageRate, forcedOutageRate);
     }
 
     @Override
     public GeneratorStartupAdderImpl withPredefinedActivePowerSetpoint(float predefinedActivePowerSetpoint) {
         this.predefinedActivePowerSetpoint = predefinedActivePowerSetpoint;
+        return this;
+    }
+
+    @Override
+    public GeneratorStartupAdder withStartUpCost(float startUpCost) {
+        this.startUpCost = startUpCost;
         return this;
     }
 

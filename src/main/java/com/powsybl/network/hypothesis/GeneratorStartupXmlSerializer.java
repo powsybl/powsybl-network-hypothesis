@@ -49,7 +49,7 @@ public class GeneratorStartupXmlSerializer implements ExtensionXmlSerializer<Gen
 
     @Override
     public String getNamespaceUri() {
-        return "http://www.itesla_project.eu/schema/iidm/ext/generator_startup/1_0";
+        return "http://www.powsybl.org/schema/iidm/ext/generator_startup/1_0";
     }
 
     @Override
@@ -60,6 +60,7 @@ public class GeneratorStartupXmlSerializer implements ExtensionXmlSerializer<Gen
     @Override
     public void write(GeneratorStartup startup, XmlWriterContext context) throws XMLStreamException {
         XmlUtil.writeFloat("predefinedActivePowerSetpoint", startup.getPredefinedActivePowerSetpoint(), context.getWriter());
+        XmlUtil.writeFloat("startUpCost", startup.getStartUpCost(), context.getWriter());
         XmlUtil.writeFloat("marginalCost", startup.getMarginalCost(), context.getWriter());
         XmlUtil.writeFloat("plannedOutageRate", startup.getPlannedOutageRate(), context.getWriter());
         XmlUtil.writeFloat("forcedOutageRate", startup.getForcedOutageRate(), context.getWriter());
@@ -68,11 +69,13 @@ public class GeneratorStartupXmlSerializer implements ExtensionXmlSerializer<Gen
     @Override
     public GeneratorStartup read(Generator generator, XmlReaderContext context) throws XMLStreamException {
         float predefinedActivePowerSetpoint = XmlUtil.readOptionalFloatAttribute(context.getReader(), "predefinedActivePowerSetpoint");
+        float startUpCost = XmlUtil.readOptionalFloatAttribute(context.getReader(), "startUpCost");
         float marginalCost = XmlUtil.readOptionalFloatAttribute(context.getReader(), "marginalCost");
         float plannedOutageRate = XmlUtil.readOptionalFloatAttribute(context.getReader(), "plannedOutageRate");
         float forcedOutageRate = XmlUtil.readOptionalFloatAttribute(context.getReader(), "forcedOutageRate");
         generator.newExtension(GeneratorStartupAdder.class)
                 .withPredefinedActivePowerSetpoint(predefinedActivePowerSetpoint)
+                .withStartUpCost(startUpCost)
                 .withMarginalCost(marginalCost)
                 .withPlannedOutageRate(plannedOutageRate)
                 .withForcedOutageRate(forcedOutageRate)

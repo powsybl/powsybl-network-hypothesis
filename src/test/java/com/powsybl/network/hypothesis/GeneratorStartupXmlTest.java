@@ -31,6 +31,7 @@ public class GeneratorStartupXmlTest extends AbstractConverterTest {
         assertNotNull(generator);
         generator.newExtension(GeneratorStartupAdder.class)
                 .withPredefinedActivePowerSetpoint(90f)
+                .withStartUpCost(5f)
                 .withMarginalCost(10f)
                 .withPlannedOutageRate(0.8f)
                 .withForcedOutageRate(0.7f)
@@ -48,6 +49,7 @@ public class GeneratorStartupXmlTest extends AbstractConverterTest {
         GeneratorStartup startup2 = generator2.getExtension(GeneratorStartup.class);
         assertNotNull(startup2);
         assertEquals(startup.getPredefinedActivePowerSetpoint(), startup2.getPredefinedActivePowerSetpoint(), 0f);
+        assertEquals(startup.getStartUpCost(), startup2.getStartUpCost(), 0f);
         assertEquals(startup.getMarginalCost(), startup2.getMarginalCost(), 0f);
         assertEquals(startup.getPlannedOutageRate(), startup2.getPlannedOutageRate(), 0f);
         assertEquals(startup.getForcedOutageRate(), startup2.getForcedOutageRate(), 0f);

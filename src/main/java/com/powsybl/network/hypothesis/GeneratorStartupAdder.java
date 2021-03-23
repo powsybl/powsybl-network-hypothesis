@@ -21,6 +21,8 @@ public interface GeneratorStartupAdder extends ExtensionAdder<Generator, Generat
 
     GeneratorStartupAdder withPredefinedActivePowerSetpoint(float predefinedActivePowerSetpoint);
 
+    GeneratorStartupAdder withStartUpCost(float startUpCost);
+
     GeneratorStartupAdder withMarginalCost(float marginalCost);
 
     GeneratorStartupAdder withPlannedOutageRate(float plannedOutageRate);
