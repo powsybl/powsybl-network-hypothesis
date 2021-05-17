@@ -21,7 +21,7 @@ import static org.junit.Assert.*;
 public class StartupGroupComparatorTest {
 
     @Test
-    public void test() {
+    public void allGeneratorsHavingExtension() {
         Network network = createTestNetwork();
         // extends generator
         Generator generator1 = network.getGenerator("G1");
@@ -70,6 +70,52 @@ public class StartupGroupComparatorTest {
         assertEquals("G2", startupGroups.get(0).getGenerator().getNameOrId());
         assertEquals("G3", startupGroups.get(1).getGenerator().getNameOrId());
         assertEquals("G1", startupGroups.get(2).getGenerator().getNameOrId());
+    }
+
+    @Test
+    public void oneGeneratorsWithoutExtension() {
+        Network network = createTestNetwork();
+        // extends generator
+        Generator generator1 = network.getGenerator("G1");
+        Generator generator2 = network.getGenerator("G2");
+        Generator generator3 = network.getGenerator("G3");
+        assertNotNull(generator1);
+        assertNotNull(generator2);
+        assertNotNull(generator3);
+
+        generator1.newExtension(GeneratorStartupAdder.class)
+                .withPredefinedActivePowerSetpoint(90f)
+                .withStartUpCost(20f)
+                .withMarginalCost(10f)
+                .withPlannedOutageRate(0.2f)
+                .withForcedOutageRate(0.8f)
+                .add();
+
+        generator3.newExtension(GeneratorStartupAdder.class)
+                .withPredefinedActivePowerSetpoint(50f)
+                .withStartUpCost(11f)
+                .withMarginalCost(10f)
+                .withPlannedOutageRate(0.4f)
+                .withForcedOutageRate(0.3f)
+                .add();
+
+        StartupGroup startupGroup1 = new StartupGroup();
+        startupGroup1.setGenerator(generator1);
+        StartupGroup startupGroup2 = new StartupGroup();
+        startupGroup2.setGenerator(generator2);
+        StartupGroup startupGroup3 = new StartupGroup();
+        startupGroup3.setGenerator(generator3);
+
+        List<StartupGroup> startupGroups = new ArrayList<>();
+        startupGroups.add(startupGroup1);
+        startupGroups.add(startupGroup2);
+        startupGroups.add(startupGroup3);
+
+        startupGroups.sort(new StartupGroupComparator());
+
+        assertEquals("G3", startupGroups.get(0).getGenerator().getNameOrId());
+        assertEquals("G1", startupGroups.get(1).getGenerator().getNameOrId());
+        assertEquals("G2", startupGroups.get(2).getGenerator().getNameOrId());
     }
 
     private static Network createTestNetwork() {

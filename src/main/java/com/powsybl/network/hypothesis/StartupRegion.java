@@ -6,11 +6,10 @@
  */
 package com.powsybl.network.hypothesis;
 
-import com.powsybl.iidm.network.Generator;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Chamseddine BENHAMED <chamseddine.benhamed at rte-france.com>
@@ -19,11 +18,18 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class StartupGroup {
-    private boolean usable = false;
-    private double availablePower = 0;
-    private double setPointPower = 0;
-    private boolean imposed = false;
-    private Generator generator;
-}
+@Builder
+// used for Mexico startup
+public class StartupRegion {
+    String name;
+    int num;
+    double consumption = 0;
+    double startedPower = 0;
+    List<StartupGroup> marginalGroups = new ArrayList<>();
+    double availablePower = 0;
+    double adjustmentToBeRealized = 0;
 
+    public double getRegionBalance() {
+        return startedPower - consumption;
+    }
+}

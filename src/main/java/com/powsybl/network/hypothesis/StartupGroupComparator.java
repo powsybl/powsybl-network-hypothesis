@@ -15,8 +15,8 @@ public class StartupGroupComparator implements Comparator<StartupGroup> {
     @Override
     public int compare(StartupGroup startupGroup1, StartupGroup startupGroup2) {
 
-        float cost1 = startupGroup1.getGenerator().getExtension(GeneratorStartup.class) != null ? startupGroup1.getGenerator().getExtension(GeneratorStartup.class).getStartUpCost() : Float.MAX_VALUE;
-        float cost2 = startupGroup2.getGenerator().getExtension(GeneratorStartup.class) != null ? startupGroup2.getGenerator().getExtension(GeneratorStartup.class).getStartUpCost() : Float.MAX_VALUE;
+        double cost1 = startupGroup1.getGenerator().getExtension(GeneratorStartup.class) != null ? startupGroup1.getGenerator().getExtension(GeneratorStartup.class).getStartUpCost() : Double.MAX_VALUE;
+        double cost2 = startupGroup2.getGenerator().getExtension(GeneratorStartup.class) != null ? startupGroup2.getGenerator().getExtension(GeneratorStartup.class).getStartUpCost() : Double.MAX_VALUE;
 
         if (cost1 == cost2) {
             return 0;

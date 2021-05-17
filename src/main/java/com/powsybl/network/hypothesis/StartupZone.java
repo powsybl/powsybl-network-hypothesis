@@ -7,12 +7,12 @@
 package com.powsybl.network.hypothesis;
 
 import com.powsybl.iidm.network.Country;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Chamseddine BENHAMED <chamseddine.benhamed at rte-france.com>
@@ -21,14 +21,18 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Zone {
+@Builder
+public class StartupZone {
+    private String name;
     private int num;
     private StartupType startupType = StartupType.EMPIL_ECO;
     private boolean canStart = true;
-    private List<Country> countries;
-    private String name;
-    private List<StartupGroup> initialGroups;
-    private List<StartupGroup> startedGroups;
-    private double imposedPower = 0.0;
+    // This attribute is not used for the first version
+    private List<Country> countries = new ArrayList<>();
+    private List<StartupGroup> startupGroups = new ArrayList<>();
+    private List<StartupGroup> startedGroups = new ArrayList<>();
+    private double imposedPower = 0;
+    private double consumption = 0;
+    private Map<String, StartupRegion> regions = new HashMap<>();
 }
 
