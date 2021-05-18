@@ -20,6 +20,9 @@ public class GeneratorsStartupAlgorithm {
 
     private static final String UNKNOWN_REGION = "UnknownRegion";
     private static final String REGION_CVG = "regionCvg";
+    private static final String DOUBTFUL_PRECISION = "DOUBTFUL PRECISION IN groups2Qua";
+    private static final String SS = "SS = {}";
+    private static final String EQUILIBRIUM = "EQUIL = {}";
 
     List<Generator> startupGroupsPowerMax = new ArrayList<>();
 
@@ -208,7 +211,6 @@ public class GeneratorsStartupAlgorithm {
                 startupGroup.setSetPointPower(pMin);
             } else {
                 startupGroup.setSetPointPower(powerToBeStarted);
-                powerToBeStarted = 0;
                 marginalGroup = startupGroup;
                 // if Mexico activated
                 if (startupZone.getStartupType() == StartupType.EMPIL_ECO && startUpMarginalGroupType == StartupMarginalGroupType.MEXICO) {
@@ -242,21 +244,11 @@ public class GeneratorsStartupAlgorithm {
         List<Double> xSol = new ArrayList<>(Collections.nCopies(nbRegions, 0.0));
         List<Integer> lBas = new ArrayList<>(Collections.nCopies(nbRegions, -1));
         double equilibrium = 0;
-        int nlb;
 
         //filling marginal groups
         for (StartupGroup startupGroup : startupZone.getStartupGroups()) {
             double startUpCostGroup = startupGroup.getGenerator().getExtension(GeneratorStartup.class).getStartUpCost();
-            if (startUpCostGroup - marginalCost < -epsilon) {
-                continue;
-            }
-            if (startUpCostGroup - marginalCost > epsilon) {
-                continue;
-            }
-            if (!startupGroup.isUsable()) {
-                continue;
-            }
-            if (startupGroup.getAvailablePower() <= 0) {
+            if (startUpCostGroup - marginalCost < -epsilon || startUpCostGroup - marginalCost > epsilon || !startupGroup.isUsable() || startupGroup.getAvailablePower() <= 0) {
                 continue;
             }
             // add the group to its region marginal groups
@@ -453,7 +445,6 @@ public class GeneratorsStartupAlgorithm {
 
         // 1-  CALCULATE DES COEFFICIENTS ET INITIALISATIONS
         // ----------------------------------------------
-        int ier = 0;
         ss  = 0.;
         sxm = 0.;
 
@@ -473,7 +464,6 @@ public class GeneratorsStartupAlgorithm {
                 LOGGER.warn("COEF {}", aco.get(i));
                 LOGGER.warn("BORNE SUP {}", xMax.get(i));
                 LOGGER.warn("BORNE MIN {}", xMin.get(i));
-                ier = 1;
                 return;
             }
             alag.set(n + i, bco.get(i) + ca * x);
@@ -486,7 +476,6 @@ public class GeneratorsStartupAlgorithm {
             LOGGER.warn("DOMAINE DE DEFINITION {}", ss);
             LOGGER.warn("A {}", sxm);
             LOGGER.warn("CONTRAINTE {}", equilibrium);
-            ier = -1;
             return;
         }
         // 3- CLASSEMENT
@@ -558,9 +547,9 @@ public class GeneratorsStartupAlgorithm {
                                 }
                             }
                             if (Math.abs(ss - equilibrium) > eps2) {
-                                LOGGER.warn("PRECISION DOUTEUSE DANS groupes2Qua");
-                                LOGGER.warn("SS = {}", ss);
-                                LOGGER.warn("EQUIL = {}", equilibrium);
+                                LOGGER.warn(DOUBTFUL_PRECISION);
+                                LOGGER.warn(SS, ss);
+                                LOGGER.warn(EQUILIBRIUM, equilibrium);
                                 return;
                             }
                             // 10- CALCUL DU NOMBRE DE REGION DE BASE
@@ -580,18 +569,18 @@ public class GeneratorsStartupAlgorithm {
                 }
                 // 8- ERREUR ?
                 if (Math.abs(ss - equilibrium) > eps2) {
-                    LOGGER.warn("PRECISION DOUTEUSE DANS groupes2Qua");
-                    LOGGER.warn("SS = {}", ss);
-                    LOGGER.warn("EQUIL = {}", equilibrium);
+                    LOGGER.warn(DOUBTFUL_PRECISION);
+                    LOGGER.warn(SS, ss);
+                    LOGGER.warn(EQUILIBRIUM, equilibrium);
                     return;
                 }
                 break;
             }
         }
         // 5- ERREUR ?
-        LOGGER.warn("PRECISION DOUTEUSE DANS groupes2Qua");
-        LOGGER.warn("SS = {}", ss);
-        LOGGER.warn("EQUIL = {}", equilibrium);
+        LOGGER.warn(DOUBTFUL_PRECISION);
+        LOGGER.warn(SS, ss);
+        LOGGER.warn(EQUILIBRIUM, equilibrium);
     }
 }
 
