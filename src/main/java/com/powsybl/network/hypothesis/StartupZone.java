@@ -10,9 +10,7 @@ import com.powsybl.iidm.network.Country;
 import lombok.*;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Chamseddine BENHAMED <chamseddine.benhamed at rte-france.com>
@@ -33,6 +31,5 @@ public class StartupZone {
     private List<StartupGroup> startedGroups = new ArrayList<>();
     private double imposedPower = 0;
     private double consumption = 0;
-    private Map<String, StartupRegion> regions = new HashMap<>();
 }
 

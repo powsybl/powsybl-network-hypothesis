@@ -18,8 +18,6 @@ import java.util.*;
 public class GeneratorsStartupAlgorithm {
     private static final Logger LOGGER = LoggerFactory.getLogger(GeneratorsStartupAlgorithm.class);
 
-    private static final String UNKNOWN_REGION = "UnknownRegion";
-
     List<Generator> startupGroupsPowerMax = new ArrayList<>();
 
     double nuclearBandSetting = 0.05;
@@ -50,9 +48,6 @@ public class GeneratorsStartupAlgorithm {
 
         // for each connected component
         startupGroupsPerConnectedComponent.keySet().forEach(component -> {
-            HashMap<String, StartupRegion> regions = new HashMap<>();
-            regions.put(UNKNOWN_REGION, StartupRegion.builder().name(UNKNOWN_REGION).marginalGroups(new ArrayList<>()).build());
-
             // create the startupZone for that connected component
             StartupZone startupZone = StartupZone.builder()
                     .name("StartupZone" + component.getNum())
@@ -63,7 +58,6 @@ public class GeneratorsStartupAlgorithm {
                     .startupGroups(startupGroupsPerConnectedComponent.get(component))
                     .startedGroups(new ArrayList<>())
                     .imposedPower(0)
-                    .regions(regions)
                     .build();
 
             // log component num
