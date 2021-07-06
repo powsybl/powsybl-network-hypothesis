@@ -19,10 +19,6 @@ public class GeneratorsStartupAlgorithm {
     private static final Logger LOGGER = LoggerFactory.getLogger(GeneratorsStartupAlgorithm.class);
 
     private static final String UNKNOWN_REGION = "UnknownRegion";
-    private static final String REGION_CVG = "regionCvg";
-    private static final String DOUBTFUL_PRECISION = "DOUBTFUL PRECISION IN groups2Qua";
-    private static final String SS = "SS = {}";
-    private static final String EQUILIBRIUM = "EQUIL = {}";
 
     List<Generator> startupGroupsPowerMax = new ArrayList<>();
 
@@ -135,7 +131,6 @@ public class GeneratorsStartupAlgorithm {
 
     private void economicalStacking(StartupZone startupZone) {
         double pMaxAvailable = 0;
-        StartupGroup marginalGroup = null;
 
         // Evaluate available production
         pMaxAvailable = evaluateProd(startupZone);
@@ -164,10 +159,17 @@ public class GeneratorsStartupAlgorithm {
         double powerToBeStarted = startupZone.getConsumption() - startupZone.getImposedPower();
         LOGGER.info("Power to be started {}", powerToBeStarted);
 
+        updateSetPointsPower(startupZone, powerToBeStarted);
+    }
+
+    private void updateSetPointsPower(StartupZone startupZone, double neededPower) {
+        double powerToBeStarted = neededPower;
+
         for (StartupGroup startupGroup : startupZone.getStartupGroups()) {
             if (!startupGroup.isUsable()) {
                 LOGGER.error("startup group {} unusable", startupGroup.getGenerator().getNameOrId());
             }
+
             if (startupGroup.isImposed()) {
                 // already handled
                 continue;
@@ -177,10 +179,6 @@ public class GeneratorsStartupAlgorithm {
                 startupGroup.setSetPointPower(startupGroup.getAvailablePower());
                 powerToBeStarted -= startupGroup.getAvailablePower();
                 startupZone.getStartedGroups().add(startupGroup);
-                if (powerToBeStarted <= 0) {
-                    marginalGroup = startupGroup;
-                    break;
-                }
                 continue;
             }
 
@@ -195,7 +193,6 @@ public class GeneratorsStartupAlgorithm {
                 startupGroup.setSetPointPower(pMin);
             } else {
                 startupGroup.setSetPointPower(powerToBeStarted);
-                marginalGroup = startupGroup;
                 startupZone.getStartedGroups().add(startupGroup);
                 break;
             }
@@ -203,9 +200,9 @@ public class GeneratorsStartupAlgorithm {
         }
     }
 
-    // Calculate zone production (imposed and available)
-    // set each group as usable or not + startedPower (with which it can starts)
-    // this methods sort zone groups
+    // calculate zone production (imposed and available)
+    // set if a group is usable or not + set startedPower
+    // this method sort zone groups
     double evaluateProd(StartupZone startupZone) {
         final double[] pMaxAvailable = {0};
         for (StartupGroup startupGroup : startupZone.getStartupGroups()) {
