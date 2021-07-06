@@ -124,18 +124,6 @@ public class GeneratorsStartupAlgorithm {
                 if (load.getLoadType() == LoadType.FICTITIOUS) {
                     consFictitious[0] += load.getP0() * (1 + lossCoefficient);
                 }
-                // prepare zones consumption per region if Mexico is activated
-                if (startupZone.getStartupType() == StartupType.EMPIL_ECO && startUpMarginalGroupType == StartupMarginalGroupType.MEXICO) {
-                    String regName = load.getTerminal().getBusView().getBus().getVoltageLevel().getSubstation().getProperty(REGION_CVG);
-                    if (regName != null) {
-                        startupZone.getRegions().computeIfAbsent(regName, k -> StartupRegion.builder().name(regName).marginalGroups(new ArrayList<>()).build());
-                        double oldValue = startupZone.getRegions().get(regName).getConsumption();
-                        startupZone.getRegions().get(regName).setConsumption(oldValue + load.getP0() * (1 + lossCoefficient));
-                    } else {
-                        double oldValue = startupZone.getRegions().get(UNKNOWN_REGION).getConsumption();
-                        startupZone.getRegions().get(UNKNOWN_REGION).setConsumption(oldValue + load.getP0() * (1 + lossCoefficient));
-                    }
-                }
             }
         });
 
@@ -191,10 +179,6 @@ public class GeneratorsStartupAlgorithm {
                 startupZone.getStartedGroups().add(startupGroup);
                 if (powerToBeStarted <= 0) {
                     marginalGroup = startupGroup;
-                    // if Mexico activated
-                    if (startupZone.getStartupType() == StartupType.EMPIL_ECO && startUpMarginalGroupType == StartupMarginalGroupType.MEXICO) {
-                        addStartedPowerToTheRegion(startupZone, startupGroup);
-                    }
                     break;
                 }
                 continue;
@@ -212,76 +196,15 @@ public class GeneratorsStartupAlgorithm {
             } else {
                 startupGroup.setSetPointPower(powerToBeStarted);
                 marginalGroup = startupGroup;
-                // if Mexico activated
-                if (startupZone.getStartupType() == StartupType.EMPIL_ECO && startUpMarginalGroupType == StartupMarginalGroupType.MEXICO) {
-                    addStartedPowerToTheRegion(startupZone, startupGroup);
-                }
                 startupZone.getStartedGroups().add(startupGroup);
                 break;
             }
             startupZone.getStartedGroups().add(startupGroup);
-            // prod per region if Mexico activated
-            if (startupZone.getStartupType() == StartupType.EMPIL_ECO && startUpMarginalGroupType == StartupMarginalGroupType.MEXICO) {
-                addStartedPowerToTheRegion(startupZone, startupGroup);
-            }
-        }
-
-        // if Mexico activated
-        if (startupZone.getStartupType() == StartupType.EMPIL_ECO && startUpMarginalGroupType == StartupMarginalGroupType.MEXICO && marginalGroup != null) {
-            mexicoAdjustment(startupZone, marginalGroup);
-        }
-    }
-
-    private void mexicoAdjustment(StartupZone startupZone, StartupGroup marginalGroup) {
-        double epsilon = 0.005;
-        double marginalCost = marginalGroup.getGenerator().getExtension(GeneratorStartup.class).getMarginalCost();
-
-        //data for Mexico
-        int nbRegions = startupZone.getRegions().size();
-        List<Double> bco = new ArrayList<>(Collections.nCopies(nbRegions, 0.0));
-        List<Double> xMax = new ArrayList<>(Collections.nCopies(nbRegions, 0.0));
-        List<Double> xMin = new ArrayList<>(Collections.nCopies(nbRegions, 0.0));
-        List<Double> xSol = new ArrayList<>(Collections.nCopies(nbRegions, 0.0));
-        List<Integer> lBas = new ArrayList<>(Collections.nCopies(nbRegions, -1));
-        double equilibrium = 0;
-
-        //filling marginal groups
-        for (StartupGroup startupGroup : startupZone.getStartupGroups()) {
-            double startUpCostGroup = startupGroup.getGenerator().getExtension(GeneratorStartup.class).getStartUpCost();
-            if (startUpCostGroup - marginalCost < -epsilon || startUpCostGroup - marginalCost > epsilon || !startupGroup.isUsable() || startupGroup.getAvailablePower() <= 0) {
-                continue;
-            }
-            // add the group to its region marginal groups
-            String regName = startupGroup.getGenerator().getTerminal().getBusView().getBus().getVoltageLevel().getSubstation().getProperty(REGION_CVG);
-            if (regName == null) {
-                regName = UNKNOWN_REGION;
-            }
-            startupZone.getRegions().get(regName).getMarginalGroups().add(startupGroup);
-
-            int numReg = 0;
-
-            for (StartupRegion startupRegion : startupZone.getRegions().values()) {
-                double regionBalance = startupRegion.getRegionBalance();
-                for (StartupGroup startupGroup1 : startupRegion.getMarginalGroups()) {
-                    regionBalance -= startupGroup1.getAvailablePower();
-                }
-                xMax.set(numReg, startupRegion.getAvailablePower());
-                xMin.set(numReg, 0.);
-                xSol.set(numReg, 0.);
-                lBas.set(numReg, -1);
-                bco.set(numReg, 2 * regionBalance);
-                numReg++;
-                equilibrium -= startupRegion.getRegionBalance() - startupRegion.getStartedPower();
-            }
-
-            groups2Qua(nbRegions, bco, xMax, xMin, xSol, equilibrium, lBas);
-
         }
     }
 
     // Calculate zone production (imposed and available)
     // set each group as usable or not + startedPower (with which it can starts)
-    // if Mexico calculate per region
     // this methods sort zone groups
     double evaluateProd(StartupZone startupZone) {
         final double[] pMaxAvailable = {0};
@@ -293,10 +216,6 @@ public class GeneratorsStartupAlgorithm {
                     startupZone.setImposedPower(startupZone.getImposedPower() + generatorStartupExtension.getPredefinedActivePowerSetpoint());
                 } else {
                     startupZone.setConsumption(startupZone.getConsumption() - generatorStartupExtension.getPredefinedActivePowerSetpoint());
-                    // if Mexico activated
-                    if (startupZone.getStartupType() == StartupType.EMPIL_ECO && startUpMarginalGroupType == StartupMarginalGroupType.MEXICO) {
-                        addImposedPowerToTheRegionAsConsumption(startupZone, startupGroup, Math.abs(generatorStartupExtension.getPredefinedActivePowerSetpoint()));
-                    }
                 }
                 startupGroup.setAvailablePower(0);
                 startupGroup.setSetPointPower(generatorStartupExtension.getPredefinedActivePowerSetpoint());
@@ -314,48 +233,8 @@ public class GeneratorsStartupAlgorithm {
                 startupGroup.setAvailablePower(pMaxAvailableStartupGroup);
                 startupGroup.setUsable(true);
             }
-            // if Mexico activated
-            if (startupZone.getStartupType() == StartupType.EMPIL_ECO && startUpMarginalGroupType == StartupMarginalGroupType.MEXICO) {
-                addAvailablePowerToTheRegion(startupZone, startupGroup);
-            }
         }
         return pMaxAvailable[0];
-    }
-
-    private void addStartedPowerToTheRegion(StartupZone startupZone, StartupGroup startupGroup) {
-        String regName = startupGroup.getGenerator().getTerminal().getBusView().getBus().getVoltageLevel().getSubstation().getProperty(REGION_CVG);
-        if (regName != null) {
-            startupZone.getRegions().computeIfAbsent(regName, k -> new StartupRegion());
-            double oldValue = startupZone.getRegions().get(regName).getStartedPower();
-            startupZone.getRegions().get(regName).setStartedPower(oldValue + startupGroup.getAvailablePower());
-        } else {
-            double oldValue = startupZone.getRegions().get(UNKNOWN_REGION).getStartedPower();
-            startupZone.getRegions().get(UNKNOWN_REGION).setStartedPower(oldValue + startupGroup.getSetPointPower());
-        }
-    }
-
-    private void addAvailablePowerToTheRegion(StartupZone startupZone, StartupGroup startupGroup) {
-        String regName = startupGroup.getGenerator().getTerminal().getBusView().getBus().getVoltageLevel().getSubstation().getProperty(REGION_CVG);
-        if (regName != null) {
-            startupZone.getRegions().computeIfAbsent(regName, k -> new StartupRegion());
-            double oldValue = startupZone.getRegions().get(regName).getAvailablePower();
-            startupZone.getRegions().get(regName).setAvailablePower(oldValue + startupGroup.getAvailablePower());
-        } else {
-            double oldValue = startupZone.getRegions().get(UNKNOWN_REGION).getAvailablePower();
-            startupZone.getRegions().get(UNKNOWN_REGION).setAvailablePower(oldValue + startupGroup.getAvailablePower());
-        }
-    }
-
-    private void addImposedPowerToTheRegionAsConsumption(StartupZone startupZone, StartupGroup startupGroup, double value) {
-        String regName = startupGroup.getGenerator().getTerminal().getBusView().getBus().getVoltageLevel().getSubstation().getProperty(REGION_CVG);
-        if (regName != null) {
-            startupZone.getRegions().computeIfAbsent(regName, k -> new StartupRegion());
-            double oldValue = startupZone.getRegions().get(regName).getConsumption();
-            startupZone.getRegions().get(regName).setConsumption(oldValue + value);
-        } else {
-            double oldValue = startupZone.getRegions().get(UNKNOWN_REGION).getConsumption();
-            startupZone.getRegions().get(UNKNOWN_REGION).setConsumption(oldValue + value);
-        }
     }
 
     double evaluateAvailableMaxPower(StartupGroup startupGroup) {
@@ -393,194 +272,6 @@ public class GeneratorsStartupAlgorithm {
             default: abatementResFreqPercentage = 0;
         }
         return abatementResFreqPercentage;
-    }
-
-    void groups2Qua(int n, List<Double> bco, List<Double> xMax, List<Double> xMin, List<Double> xSol, double equilibrium, List<Integer> lBas) {
-        // MINIMISER LA SOMME , POUR I=1,N , DE :
-        //
-        // BCO(I)*(XSOL(I)-XMIN(I))+ACO(I)*(XSOL(I)-XMIN(I))²
-        //
-        // SOUS LA CONTRAINTE : SOMME DES XSOL(I)=EQUIL
-        //
-        // AVEC   XMIN(I) < XSOL(I) < XMAX(I)
-        //
-        // ALAG ET LRJ DE DIMENSION 2N , LBAS DE DIMENSION N
-        //
-        // On alimente ce module avec :
-        // n le nombre de regions
-        // Xmin =0; Xmax = Puissance marginale demarrable sur la region
-        // equil = le volume a demarrer pour assurer l equilibre
-        // bco = 2 * bilan importateur region
-        // aco =1
-        // Le probleme de minimisation revient a
-        // minimiser la somme sur les regions :
-        // ( bilan Import  + XSOL)^2
-
-        List<Double> aco = new ArrayList<>(Collections.nCopies(n, 0.0));
-        List<Double> alag = new ArrayList<>(Collections.nCopies(2 * n, 0.0));
-        List<Integer> lrj = new ArrayList<>(Collections.nCopies(2 * n, 0));
-        int nlb; // TODO
-        double   eps1 = 1.e-5;
-        double eps2 = 0.1;
-        double  ss;
-        double  sxm;
-        double  xs;
-        double  xm;
-        double  ca;
-        double  x;
-        double  ag;
-        double  agj;
-        double  sso;
-        double  r;
-        int  i;
-        int  j;
-        int  ij;
-        int  jj;
-        int  nn;
-        int  nm;
-        int  km;
-        int  jb;
-        int  k;
-        int  ih;
-
-        // 1-  CALCULATE DES COEFFICIENTS ET INITIALISATIONS
-        // ----------------------------------------------
-        ss  = 0.;
-        sxm = 0.;
-
-        for (i = 0; i < n; i++) {
-            xs = xMin.get(i);
-            xm = xMax.get(i);
-            xSol.set(i, xs);
-            ss += xs;
-            sxm += xm;
-            lBas.set(i, -1);
-            alag.set(i, bco.get(i));
-            ca = aco.get(i) * 2;
-            x = xm - xs;
-
-            if (ca < eps1 || x < 0) {
-                LOGGER.warn("ERREUR DANS groupes2Qua LA VARIABLE {}", i);
-                LOGGER.warn("COEF {}", aco.get(i));
-                LOGGER.warn("BORNE SUP {}", xMax.get(i));
-                LOGGER.warn("BORNE MIN {}", xMin.get(i));
-                return;
-            }
-            alag.set(n + i, bco.get(i) + ca * x);
-            lrj .set(i, i);
-            lrj.set(n + i, i);
-        }
-        // 2-  Y A-T-IL UNE SOLUTION ?
-        if (ss > equilibrium || sxm < equilibrium) {
-            LOGGER.warn("ERREUR DANS groupes2Qua");
-            LOGGER.warn("DOMAINE DE DEFINITION {}", ss);
-            LOGGER.warn("A {}", sxm);
-            LOGGER.warn("CONTRAINTE {}", equilibrium);
-            return;
-        }
-        // 3- CLASSEMENT
-        // -------------
-        nn = 2 * n;
-        nm = nn - 1;
-        for (i = 0; i < nm; i++) {
-            xm = alag.get(i);
-            km = i;
-            jj = i + 1;
-            for (j = jj; j < nn; j++) {
-                if (alag.get(j) < xm) {
-                    xm = alag.get(j);
-                    km = j;
-                }
-            }
-            alag.set(km, alag.get(i));
-            alag.set(i, xm);
-            ij = lrj.get(i);
-            lrj.set(i, lrj.get(km));
-            lrj.set(km, ij);
-        }
-        // 4- INDICE DE LA SOLUTION INITIALE
-        // ---------------------------------
-        sxm = ss;
-        for (jb = 0; jb < nn; jb++) {
-            i = lrj.get(jb);
-            xm       = xMax.get(i) - xMin.get(i);
-            lBas.set(i, lBas.get(i) + 1);
-            if (lBas.get(i) != 0) {
-                xSol.set(i, xMax.get(i));
-                ss += xm;
-            } else {
-                sxm += xm;
-            }
-            if (sxm >= equilibrium) {
-                // 6- SOLUTION INITIAL
-                ag = alag.get(jb);
-                for (i = 0; i < n; i++) {
-                    if (lBas.get(i) == 0) {
-                        x = (ag - bco.get(i)) / (2. * aco.get(i));
-                        xSol.set(i, xSol.get(i) + x);
-                        ss += x;
-                    }
-                }
-                // 7- OPTIMISATION
-                // ---------------
-                for (j = jb + 1; j < nn; j++) {
-                    sso = ss;
-                    agj = alag.get(j);
-                    xm = (agj - ag) / 2.;
-                    if (xm >= eps1) {
-                        for (k = 0; k < n; k++) {
-                            if (lBas.get(k) == 0) {
-                                r = xm / aco.get(k);
-                                ss += r;
-                                xSol.set(k, xSol.get(k) + r);
-                            }
-                        }
-                        if (ss >= equilibrium) {
-                            // 9- AJUSTEMENT DE LA SOLUTION
-                            // ----------------------------
-                            xm = xm * (equilibrium - ss) / (ss - sso);
-                            for (k = 0; k < n; k++) {
-                                if (lBas.get(k) == 0) {
-                                    r = xm / aco.get(k);
-                                    ss      += r;
-                                    xSol.set(k, xSol.get(k) + r);
-                                }
-                            }
-                            if (Math.abs(ss - equilibrium) > eps2) {
-                                LOGGER.warn(DOUBTFUL_PRECISION);
-                                LOGGER.warn(SS, ss);
-                                LOGGER.warn(EQUILIBRIUM, equilibrium);
-                                return;
-                            }
-                            // 10- CALCUL DU NOMBRE DE REGION DE BASE
-                            // --------------------------------------
-                            nlb = 0;
-                            for (i = 0; i < n; i++) {
-                                if (lBas.get(i) == 0) {
-                                    nlb++;
-                                }
-                            }
-                            return;
-                        }
-                    }
-                    ih = lrj.get(j);
-                    lBas.set(ih, lBas.get(ih) + 1);
-                    ag = agj;
-                }
-                // 8- ERREUR ?
-                if (Math.abs(ss - equilibrium) > eps2) {
-                    LOGGER.warn(DOUBTFUL_PRECISION);
-                    LOGGER.warn(SS, ss);
-                    LOGGER.warn(EQUILIBRIUM, equilibrium);
-                    return;
-                }
-                break;
-            }
-        }
-        // 5- ERREUR ?
-        LOGGER.warn(DOUBTFUL_PRECISION);
-        LOGGER.warn(SS, ss);
-        LOGGER.warn(EQUILIBRIUM, equilibrium);
     }
 }
 

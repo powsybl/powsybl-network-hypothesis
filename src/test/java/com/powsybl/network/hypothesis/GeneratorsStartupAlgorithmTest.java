@@ -50,18 +50,6 @@ public class GeneratorsStartupAlgorithmTest {
         assertEquals(-10, network.getGenerator("G4").getTargetP(), 0.001);
     }
 
-    @Test
-    public void testGeneratorsStartupAlgorithmWithMexicoActivated() {
-        Network network = createTestNetwork();
-        GeneratorsStartupAlgorithm generatorsStartupAlgorithm = new GeneratorsStartupAlgorithm();
-        generatorsStartupAlgorithm.apply(network, StartupMarginalGroupType.MEXICO, 0.1, 0.02, 0, 0, new ArrayList<>());
-
-        assertEquals(76.95, network.getGenerator("G1").getTargetP(), 0.001);
-        assertEquals(76.95, network.getGenerator("G2").getTargetP(), 0.001);
-        assertEquals(29.5, network.getGenerator("G3").getTargetP(), 0.001);
-        assertEquals(-10, network.getGenerator("G4").getTargetP(), 0.001);
-    }
-
     private static Network createTestNetwork() {
         Network network = NetworkFactory.findDefault().createNetwork("test", "test");
         network.setCaseDate(DateTime.parse("2021-05-11T12:27:58.535+02:00"));
@@ -69,7 +57,7 @@ public class GeneratorsStartupAlgorithmTest {
                 .setId("S")
                 .setCountry(Country.FR)
                 .add();
-        Substation s2 = network.newSubstation()
+        network.newSubstation()
                 .setId("S2")
                 .setCountry(Country.FR)
                 .add();
