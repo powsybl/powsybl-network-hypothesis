@@ -50,7 +50,22 @@ public class GeneratorsStartupAlgorithmTest {
         assertEquals(-10, network.getGenerator("G4").getTargetP(), 0.001);
     }
 
-    private static Network createTestNetwork() {
+    @Test
+    public void testGeneratorsStartupAlgorithmWithConsumptionGreaterThanProduction() {
+        Network network = createTestNetworkWithLoadsValue(200, 300, 400);
+        assertEquals(4, network.getGeneratorCount());
+        assertEquals(3, network.getLoadCount());
+        GeneratorsStartupAlgorithm generatorsStartupAlgorithm = new GeneratorsStartupAlgorithm();
+        generatorsStartupAlgorithm.apply(network, StartupMarginalGroupType.CLASSIC, 0.1, 0.02, 0, 0, new ArrayList<>());
+
+        // No generator is started
+        assertEquals(0, network.getGenerator("G1").getTargetP(), 0.001);
+        assertEquals(0, network.getGenerator("G2").getTargetP(), 0.001);
+        assertEquals(0, network.getGenerator("G3").getTargetP(), 0.001);
+        assertEquals(0, network.getGenerator("G4").getTargetP(), 0.001);
+    }
+
+    private static Network createTestNetworkWithLoadsValue(double val1, double val2, double val3) {
         Network network = NetworkFactory.findDefault().createNetwork("test", "test");
         network.setCaseDate(DateTime.parse("2021-05-11T12:27:58.535+02:00"));
         Substation s = network.newSubstation()
@@ -153,7 +168,7 @@ public class GeneratorsStartupAlgorithmTest {
                 .setName("Load1")
                 .setBus("B")
                 .setConnectableBus("B")
-                .setP0(50)
+                .setP0(val1)
                 .setQ0(0)
                 .add();
 
@@ -162,7 +177,7 @@ public class GeneratorsStartupAlgorithmTest {
                 .setName("Load2")
                 .setBus("B2")
                 .setConnectableBus("B2")
-                .setP0(60)
+                .setP0(val2)
                 .setQ0(0)
                 .add();
 
@@ -171,7 +186,7 @@ public class GeneratorsStartupAlgorithmTest {
                 .setName("Load3")
                 .setBus("B2")
                 .setConnectableBus("B2")
-                .setP0(60)
+                .setP0(val3)
                 .setQ0(0)
                 .add();
 
@@ -212,5 +227,9 @@ public class GeneratorsStartupAlgorithmTest {
                 .add();
 
         return network;
+    }
+
+    private static Network createTestNetwork() {
+        return createTestNetworkWithLoadsValue(50, 60, 60);
     }
 }
