@@ -170,12 +170,7 @@ public class GeneratorsStartupAlgorithm {
                 LOGGER.error("startup group {} unusable", startupGroup.getGenerator().getNameOrId());
             }
 
-            if (startupGroup.isImposed()) {
-                // already handled
-                continue;
-            }
-
-            if (startupGroupsPowerMax.contains(startupGroup.getGenerator())) {
+            if (startupGroupsPowerMax.contains(startupGroup.getGenerator()) && !startupGroup.isImposed()) {
                 startupGroup.setSetPointPower(startupGroup.getAvailablePower());
                 powerToBeStarted -= startupGroup.getAvailablePower();
                 startupZone.getStartedGroups().add(startupGroup);
@@ -184,19 +179,19 @@ public class GeneratorsStartupAlgorithm {
 
             double pMin = startupGroup.getGenerator().getMinP() < 0 ? startupGroup.getGenerator().getMinP() : 0;
 
-            if (startupGroup.getAvailablePower() < powerToBeStarted) {
-                powerToBeStarted -= startupGroup.getAvailablePower();
-                startupGroup.setSetPointPower(startupGroup.getAvailablePower());
-            } else if (powerToBeStarted < pMin) {
-                startupGroup.setAvailablePower(pMin);
-                powerToBeStarted -= pMin;
-                startupGroup.setSetPointPower(pMin);
-            } else {
-                startupGroup.setSetPointPower(powerToBeStarted);
+            if (!startupGroup.isImposed()) {
+                if (startupGroup.getAvailablePower() < powerToBeStarted) {
+                    powerToBeStarted -= startupGroup.getAvailablePower();
+                    startupGroup.setSetPointPower(startupGroup.getAvailablePower());
+                } else if (powerToBeStarted < pMin) {
+                    startupGroup.setAvailablePower(pMin);
+                    powerToBeStarted -= pMin;
+                    startupGroup.setSetPointPower(pMin);
+                } else {
+                    startupGroup.setSetPointPower(powerToBeStarted);
+                }
                 startupZone.getStartedGroups().add(startupGroup);
-                break;
             }
-            startupZone.getStartedGroups().add(startupGroup);
         }
     }
 
