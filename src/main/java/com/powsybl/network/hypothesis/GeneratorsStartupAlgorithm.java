@@ -204,11 +204,7 @@ public class GeneratorsStartupAlgorithm {
         final double[] pMaxAvailable = {0};
         for (StartupGroup startupGroup : startupZone.getStartupGroups()) {
             GeneratorStartup generatorStartupExtension = startupGroup.getGenerator().getExtension(GeneratorStartup.class);
-            if (generatorStartupExtension == null) {
-                // Should we ignore generators with no GeneratorStartup extension ?
-                continue;
-            }
-            if (generatorStartupExtension.getPredefinedActivePowerSetpoint() != Double.MAX_VALUE) {
+            if (generatorStartupExtension != null && generatorStartupExtension.getPredefinedActivePowerSetpoint() != Double.MAX_VALUE) {
                 // imposed power
                 if (generatorStartupExtension.getPredefinedActivePowerSetpoint() >= 0) {
                     startupZone.setImposedPower(startupZone.getImposedPower() + generatorStartupExtension.getPredefinedActivePowerSetpoint());
@@ -222,7 +218,8 @@ public class GeneratorsStartupAlgorithm {
                 startupGroup.setUsable(true);
                 startupZone.getStartedGroups().add(startupGroup);
             } else {
-                if (startupGroup.getGenerator().getEnergySource() == EnergySource.HYDRO) {
+                if (startupGroup.getGenerator().getEnergySource() == EnergySource.HYDRO || generatorStartupExtension == null) {
+                    // Should we ignore generators with no GeneratorStartup extension ?
                     // do not start hydro groups !
                     startupGroup.setUsable(false);
                     continue;

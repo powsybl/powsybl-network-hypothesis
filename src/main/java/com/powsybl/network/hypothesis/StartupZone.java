@@ -7,7 +7,6 @@
 package com.powsybl.network.hypothesis;
 
 import com.powsybl.iidm.network.Country;
-import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;

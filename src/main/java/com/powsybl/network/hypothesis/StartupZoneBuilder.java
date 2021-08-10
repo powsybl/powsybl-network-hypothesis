@@ -26,9 +26,6 @@ public class StartupZoneBuilder {
     private double imposedPower = 0;
     private double consumption = 0;
 
-    public StartupZoneBuilder() {
-    }
-
     public StartupZoneBuilder name(String name) {
         this.name = name;
         return this;
