@@ -33,9 +33,19 @@ public class GeneratorsStartupAlgorithm {
     double pThreshold = 0.0;
     double qThreshold = 0.0;
 
+    /**
+     * starts generators groups using Classic or Mexico algorithm
+     * @param network
+     * @param startUpMarginalGroupType Mexico or Classic
+     * @param defaultAbatementCoefficient defaultAbatementCoefficient parameter
+     * @param lossCoefficient lossCoefficient parameter
+     * @param pThreshold pThreshold parameter
+     * @param qThreshold qThreshold parameter
+     * @param startupGroupsPowerMax list of groups that should be started at Pmax if picked
+     */
     public void apply(Network network, StartupMarginalGroupType startUpMarginalGroupType, double defaultAbatementCoefficient,
                       double lossCoefficient, double pThreshold, double qThreshold, List<Generator> startupGroupsPowerMax) {
-
+        //parameters initialization
         this.lossCoefficient = lossCoefficient;
         this.defaultAbatementCoefficient = defaultAbatementCoefficient;
         this.pThreshold = pThreshold;
@@ -103,7 +113,6 @@ public class GeneratorsStartupAlgorithm {
     }
 
     // calculate  zone global consumption + losses
-    // if Mexico calculate consumption per zone region
     private void evaluateConsumption(Network network, StartupZone startupZone) {
         final double[] consZone = {0};
         final double[] consFictitious = {0};
@@ -191,16 +200,20 @@ public class GeneratorsStartupAlgorithm {
 
     // calculate zone production (imposed and available)
     // set if a group is usable or not + set startedPower
-    // this method sort zone groups
     double evaluateProd(StartupZone startupZone) {
         final double[] pMaxAvailable = {0};
         for (StartupGroup startupGroup : startupZone.getStartupGroups()) {
             GeneratorStartup generatorStartupExtension = startupGroup.getGenerator().getExtension(GeneratorStartup.class);
+            if (generatorStartupExtension == null) {
+                // Should we ignore generators with no GeneratorStartup extension ?
+                continue;
+            }
             if (generatorStartupExtension.getPredefinedActivePowerSetpoint() != Double.MAX_VALUE) {
                 // imposed power
                 if (generatorStartupExtension.getPredefinedActivePowerSetpoint() >= 0) {
                     startupZone.setImposedPower(startupZone.getImposedPower() + generatorStartupExtension.getPredefinedActivePowerSetpoint());
                 } else {
+                    // negative power -> consumption
                     startupZone.setConsumption(startupZone.getConsumption() - generatorStartupExtension.getPredefinedActivePowerSetpoint());
                 }
                 startupGroup.setAvailablePower(0);
