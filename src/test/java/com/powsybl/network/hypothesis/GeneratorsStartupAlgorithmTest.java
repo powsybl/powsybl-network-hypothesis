@@ -46,7 +46,7 @@ public class GeneratorsStartupAlgorithmTest {
 
         assertEquals(76.95, network.getGenerator("G1").getTargetP(), 0.001);
         assertEquals(76.95, network.getGenerator("G2").getTargetP(), 0.001);
-        assertEquals(190, network.getGenerator("G3").getTargetP(), 0.001); // TODO is that the expected behaviour?
+        assertEquals(190, network.getGenerator("G3").getTargetP(), 0.001);
         assertEquals(-10, network.getGenerator("G4").getTargetP(), 0.001);
     }
 
