@@ -7,8 +7,8 @@
                 <iidm:switch id="F" name="G" fictitious="true" kind="DISCONNECTOR" retained="false" open="false" node1="0" node2="1"/>
                 <iidm:switch id="H" name="I" fictitious="true" kind="DISCONNECTOR" retained="false" open="false" node1="0" node2="3"/>
                 <iidm:switch id="J" name="K" fictitious="true" kind="BREAKER" retained="true" open="false" node1="1" node2="2"/>
-                <iidm:switch id="L" name="M" fictitious="true" kind="BREAKER" retained="true" open="true" node1="3" node2="4"/>
-                <iidm:bus v="234.40912" angle="0.0" nodes="0,1,2,3"/>
+                <iidm:switch id="L" name="M" fictitious="true" kind="BREAKER" retained="true" open="false" node1="3" node2="4"/>
+                <iidm:bus v="234.40912" angle="0.0" nodes="0,1,2,3,4"/>
             </iidm:nodeBreakerTopology>
         </iidm:voltageLevel>
         <iidm:voltageLevel id="N" nominalV="225.0" lowVoltageLimit="220.0" highVoltageLimit="245.00002" topologyKind="NODE_BREAKER">

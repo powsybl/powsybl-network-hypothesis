@@ -98,10 +98,8 @@ public final class HypothesisUtils {
                 busSetter.accept(bus, adder);
                 adder.setBus1(bus.getId());
             }
-            terminal.disconnect();
         } else if (terminal.getVoltageLevel().getTopologyKind() == TopologyKind.NODE_BREAKER) {
             int node = terminal.getNodeBreakerView().getNode();
-            terminal.disconnect();
             nodeSetter.accept(node, adder);
         } else {
             throw new AssertionError();
