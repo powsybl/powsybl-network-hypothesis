@@ -21,11 +21,10 @@ public final class HypothesisUtils {
 
     public static void createVoltageLevelOnLine(double rdp, double xdp, double g1dp, double b1dp, double g2dp, double b2dp,
                                                 Line line) {
-        createVoltageLevelOnLine(rdp, xdp, g1dp, b1dp, g2dp, b2dp, TopologyKind.BUS_BREAKER, line);
-    }
-
-    public static void createVoltageLevelOnLine(double rdp, double xdp, double g1dp, double b1dp, double g2dp, double b2dp,
-                                                TopologyKind topologyKind, Line line) {
+        TopologyKind topologyKind = line.getTerminal1().getVoltageLevel().getTopologyKind();
+        if (topologyKind != line.getTerminal2().getVoltageLevel().getTopologyKind()) {
+            throw new AssertionError();
+        }
         Network network = line.getNetwork();
         Substation substation = network.newSubstation()
                 .setId(line.getId() + "_SUBSTATION")
@@ -85,9 +84,9 @@ public final class HypothesisUtils {
         } else {
             throw new AssertionError();
         }
+        line.remove();
         adder1.add();
         adder2.add();
-        line.remove();
     }
 
     private static void attachLine(Terminal terminal, LineAdder adder, BiConsumer<Bus, LineAdder> connectableBusSetter,
