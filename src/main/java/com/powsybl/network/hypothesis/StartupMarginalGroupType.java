@@ -10,7 +10,6 @@ package com.powsybl.network.hypothesis;
  * @author Chamseddine BENHAMED <chamseddine.benhamed at rte-france.com>
  */
 public enum StartupMarginalGroupType {
-    MEXICO,
-    CLASSIC
+    BASIC
 }
 
