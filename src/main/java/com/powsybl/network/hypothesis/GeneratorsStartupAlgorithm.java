@@ -27,7 +27,7 @@ public class GeneratorsStartupAlgorithm {
     double lossCoefficient = 0;
     double defaultAbatementCoefficient = 0;
 
-    StartupMarginalGroupType startUpMarginalGroupType = StartupMarginalGroupType.CLASSIC;
+    StartupMarginalGroupType startUpMarginalGroupType = StartupMarginalGroupType.BASIC;
 
     //thresholds for voltage adjustment
     double pThreshold = 0.0;
@@ -62,12 +62,12 @@ public class GeneratorsStartupAlgorithm {
             StartupZone startupZone = StartupZone.builder()
                     .name("StartupZone" + component.getNum())
                     .num(component.getNum())
-                    .startupType(StartupType.EMPIL_ECO)
+                    .startupType(StartupType.PRECEDENCE_ECONOMIC)
                     .canStart(true)
                     .countries(new ArrayList<>())
                     .startupGroups(startupGroupsPerConnectedComponent.get(component))
                     .startedGroups(new ArrayList<>())
-                    .imposedPower(0)
+                    .plannedActivePower(0)
                     .build();
 
             // log component num
@@ -75,7 +75,7 @@ public class GeneratorsStartupAlgorithm {
 
             evaluateConsumption(network, startupZone); // real consumption + losses
 
-            if (startupZone.getStartupType() == StartupType.EMPIL_ECO) {
+            if (startupZone.getStartupType() == StartupType.PRECEDENCE_ECONOMIC) {
                 economicalStacking(startupZone);
             }
 
@@ -204,16 +204,16 @@ public class GeneratorsStartupAlgorithm {
         final double[] pMaxAvailable = {0};
         for (StartupGroup startupGroup : startupZone.getStartupGroups()) {
             GeneratorStartup generatorStartupExtension = startupGroup.getGenerator().getExtension(GeneratorStartup.class);
-            if (generatorStartupExtension != null && generatorStartupExtension.getPredefinedActivePowerSetpoint() != Double.MAX_VALUE) {
+            if (generatorStartupExtension != null && generatorStartupExtension.getPlannedActivePowerSetpoint() != Double.MAX_VALUE) {
                 // imposed power
-                if (generatorStartupExtension.getPredefinedActivePowerSetpoint() >= 0) {
-                    startupZone.setImposedPower(startupZone.getImposedPower() + generatorStartupExtension.getPredefinedActivePowerSetpoint());
+                if (generatorStartupExtension.getPlannedActivePowerSetpoint() >= 0) {
+                    startupZone.setImposedPower(startupZone.getImposedPower() + generatorStartupExtension.getPlannedActivePowerSetpoint());
                 } else {
                     // negative power -> consumption
-                    startupZone.setConsumption(startupZone.getConsumption() - generatorStartupExtension.getPredefinedActivePowerSetpoint());
+                    startupZone.setConsumption(startupZone.getConsumption() - generatorStartupExtension.getPlannedActivePowerSetpoint());
                 }
                 startupGroup.setAvailablePower(0);
-                startupGroup.setSetPointPower(generatorStartupExtension.getPredefinedActivePowerSetpoint());
+                startupGroup.setSetPointPower(generatorStartupExtension.getPlannedActivePowerSetpoint());
                 startupGroup.setImposed(true);
                 startupGroup.setUsable(true);
                 startupZone.getStartedGroups().add(startupGroup);

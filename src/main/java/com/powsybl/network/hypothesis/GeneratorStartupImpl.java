@@ -14,7 +14,7 @@ import com.powsybl.iidm.network.Generator;
  */
 public class GeneratorStartupImpl extends AbstractExtension<Generator> implements GeneratorStartup {
 
-    private double predefinedActivePowerSetpoint;
+    private double plannedActivePowerSetpoint;
 
     private double startUpCost;
 
@@ -24,9 +24,10 @@ public class GeneratorStartupImpl extends AbstractExtension<Generator> implement
 
     private double forcedOutageRate;
 
-    public GeneratorStartupImpl(Generator generator, double predefinedActivePowerSetpoint, double startUpCost, double marginalCost, double plannedOutageRate, double forcedOutageRate) {
+    public GeneratorStartupImpl(Generator generator, double plannedActivePowerSetpoint, double startUpCost,
+                                double marginalCost, double plannedOutageRate, double forcedOutageRate) {
         super(generator);
-        this.predefinedActivePowerSetpoint = predefinedActivePowerSetpoint;
+        this.plannedActivePowerSetpoint = plannedActivePowerSetpoint;
         this.startUpCost = startUpCost;
         this.marginalCost = marginalCost;
         this.plannedOutageRate = plannedOutageRate;
@@ -34,23 +35,23 @@ public class GeneratorStartupImpl extends AbstractExtension<Generator> implement
     }
 
     @Override
-    public double getPredefinedActivePowerSetpoint() {
-        return predefinedActivePowerSetpoint;
+    public double getPlannedActivePowerSetpoint() {
+        return plannedActivePowerSetpoint;
     }
 
     @Override
-    public GeneratorStartupImpl setPredefinedActivePowerSetpoint(double predefinedActivePowerSetpoint) {
-        this.predefinedActivePowerSetpoint = predefinedActivePowerSetpoint;
+    public GeneratorStartupImpl setPlannedActivePowerSetpoint(double plannedActivePowerSetpoint) {
+        this.plannedActivePowerSetpoint = plannedActivePowerSetpoint;
         return this;
     }
 
     @Override
-    public double getStartUpCost() {
+    public double getStartupCost() {
         return startUpCost;
     }
 
     @Override
-    public GeneratorStartup setStartUpCost(double startUpCost) {
+    public GeneratorStartup setStartupCost(double startUpCost) {
         this.startUpCost = startUpCost;
         return this;
     }
