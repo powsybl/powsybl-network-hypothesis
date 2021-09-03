@@ -32,25 +32,25 @@ public class StartupGeneratorComparatorTest {
         assertNotNull(generator3);
 
         generator1.newExtension(GeneratorStartupAdder.class)
-                .withPlannedActivePowerSetpoint(90f)
-                .withStartupCost(20f)
-                .withMarginalCost(10f)
-                .withPlannedOutageRate(0.2f)
-                .withForcedOutageRate(0.8f)
+                .withPlannedActivePowerSetpoint(90)
+                .withStartupCost(20)
+                .withMarginalCost(10)
+                .withPlannedOutageRate(0.2)
+                .withForcedOutageRate(0.8)
                 .add();
         generator2.newExtension(GeneratorStartupAdder.class)
-                .withPlannedActivePowerSetpoint(100f)
-                .withStartupCost(5f)
-                .withMarginalCost(9f)
-                .withPlannedOutageRate(0.7f)
-                .withForcedOutageRate(0.1f)
+                .withPlannedActivePowerSetpoint(100)
+                .withStartupCost(5)
+                .withMarginalCost(9)
+                .withPlannedOutageRate(0.7)
+                .withForcedOutageRate(0.1)
                 .add();
         generator3.newExtension(GeneratorStartupAdder.class)
-                .withPlannedActivePowerSetpoint(50f)
-                .withStartupCost(11f)
-                .withMarginalCost(10f)
-                .withPlannedOutageRate(0.4f)
-                .withForcedOutageRate(0.3f)
+                .withPlannedActivePowerSetpoint(50)
+                .withStartupCost(11)
+                .withMarginalCost(10)
+                .withPlannedOutageRate(0.4)
+                .withForcedOutageRate(0.3)
                 .add();
 
         StartupGenerator startupGenerator1 = new StartupGenerator();
@@ -84,19 +84,19 @@ public class StartupGeneratorComparatorTest {
         assertNotNull(generator3);
 
         generator1.newExtension(GeneratorStartupAdder.class)
-                .withPlannedActivePowerSetpoint(90f)
-                .withStartupCost(20f)
-                .withMarginalCost(10f)
-                .withPlannedOutageRate(0.2f)
-                .withForcedOutageRate(0.8f)
+                .withPlannedActivePowerSetpoint(90)
+                .withStartupCost(20)
+                .withMarginalCost(10)
+                .withPlannedOutageRate(0.2)
+                .withForcedOutageRate(0.8)
                 .add();
 
         generator3.newExtension(GeneratorStartupAdder.class)
-                .withPlannedActivePowerSetpoint(50f)
-                .withStartupCost(11f)
-                .withMarginalCost(10f)
-                .withPlannedOutageRate(0.4f)
-                .withForcedOutageRate(0.3f)
+                .withPlannedActivePowerSetpoint(50)
+                .withStartupCost(11)
+                .withMarginalCost(10)
+                .withPlannedOutageRate(0.4)
+                .withForcedOutageRate(0.3)
                 .add();
 
         StartupGenerator startupGenerator1 = new StartupGenerator();

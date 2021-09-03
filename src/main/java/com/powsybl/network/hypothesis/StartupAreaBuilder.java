@@ -18,7 +18,7 @@ public class StartupAreaBuilder {
     private String name;
     private int num;
     private StartupType startupType = StartupType.PRECEDENCE_ECONOMIC;
-    private boolean canStart = true; // meaning not clear.
+    private boolean active = true; // meaning not clear.
     private List<Country> countries = new ArrayList<>(); // This attribute is not used for the first version
     private List<StartupGenerator> startupGenerators = new ArrayList<>(); // groupsToBeStarted?
     private List<StartupGenerator> startedGroups = new ArrayList<>();
@@ -40,8 +40,8 @@ public class StartupAreaBuilder {
         return this;
     }
 
-    public StartupAreaBuilder canStart(boolean canStart) {
-        this.canStart = canStart;
+    public StartupAreaBuilder isActive(boolean active) {
+        this.active = active;
         return this;
     }
 
@@ -66,7 +66,7 @@ public class StartupAreaBuilder {
     }
 
     public StartupArea build() {
-        return new StartupArea(name, num, startupType, canStart, countries,
+        return new StartupArea(name, num, startupType, active, countries,
                 startupGenerators, startedGroups, totalPlannedActivePower, totalConsumption);
     }
 }

@@ -18,7 +18,7 @@ public class StartupArea {
     private String name;
     private int num;
     private StartupType startupType = StartupType.PRECEDENCE_ECONOMIC;
-    private boolean canStart = true;
+    private boolean active = true;
     private List<Country> countries = new ArrayList<>(); // This attribute is not used for the first version
     private List<StartupGenerator> startupGenerators = new ArrayList<>(); // groupsToBeStarted?
     private List<StartupGenerator> startedGroups = new ArrayList<>();
@@ -33,12 +33,12 @@ public class StartupArea {
         return new StartupAreaBuilder();
     }
 
-    public StartupArea(String name, int num, StartupType startupType, boolean canStart, List<Country> countries,
+    public StartupArea(String name, int num, StartupType startupType, boolean active, List<Country> countries,
                        List<StartupGenerator> startupGenerators, List<StartupGenerator> startedGroups, double totalPlannedActivePower, double totalConsumption) {
         this.name = name;
         this.num = num;
         this.startupType = startupType;
-        this.canStart = canStart;
+        this.active = active;
         this.countries = countries;
         this.startupGenerators = startupGenerators;
         this.startedGroups = startedGroups;
@@ -70,12 +70,12 @@ public class StartupArea {
         this.startupType = startupType;
     }
 
-    public boolean isCanStart() {
-        return canStart;
+    public boolean isActive() {
+        return active;
     }
 
-    public void setCanStart(boolean canStart) {
-        this.canStart = canStart;
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     public List<Country> getCountries() {

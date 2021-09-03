@@ -15,86 +15,86 @@ import java.util.*;
 /**
  * @author Chamseddine BENHAMED <chamseddine.benhamed at rte-france.com>
  */
-public class GeneratorsStartupAlgorithm {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GeneratorsStartupAlgorithm.class);
+public class GeneratorsStartupHypothesis {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GeneratorsStartupHypothesis.class);
 
-    List<Generator> startupGroupsAtMaxActivePower = new ArrayList<>();
+    List<Generator> startupGeneratorsAtMaxActivePower = new ArrayList<>(); // list of generators that should be started at maxP if chosen
 
-    double nuclearBandSetting = 0.05;
-    double thermalBandSetting = 0.05;
-    double hydroBandSetting = 0.1;
+    double nuclearAdequacyMarginRatio = 0.05; // the ratio of generation reserved for adequacy for nuclear units
+    double thermalAdequacyMarginRatio = 0.05; // the ratio of generation reserved for adequacy for thermal units
+    double hydroAdequacyMarginRatio = 0.1; // the ratio of generation reserved for adequacy for hydro units
 
-    double lossCoefficient = 0;
-    double defaultAbatementCoefficient = 0;
+    double lossFactor = 0; // the factor of active power losses in the whole network
+    double defaultReductionRatio = 0; // default ratio that defines the global reduction of active power availability
 
-    StartupMarginalGeneratorType startUpMarginalGeneratorType = StartupMarginalGeneratorType.BASIC;
+    StartupMarginalGeneratorType startupMarginalGeneratorType = StartupMarginalGeneratorType.BASIC;
 
-    //thresholds for voltage adjustment
+    // thresholds for voltage control
     double pThreshold = 0.0;
     double qThreshold = 0.0;
 
     /**
      * starts generators groups using Classic or Mexico algorithm
      * @param network
-     * @param startUpMarginalGeneratorType Mexico or Classic
-     * @param defaultAbatementCoefficient defaultAbatementCoefficient parameter
-     * @param lossCoefficient lossCoefficient parameter
+     * @param startupMarginalGeneratorType BASIC only for the moment
+     * @param defaultReductionRatio default ratio that defines the global reduction of active power availability
+     * @param lossFactor the coefficient of active power losses
      * @param pThreshold pThreshold parameter
      * @param qThreshold qThreshold parameter
-     * @param startupGroupsAtMaxActivePower list of groups that should be started at Pmax if picked
+     * @param startupGroupsAtMaxActivePower list of generators that should be started at maxP if chosen
      */
-    public void apply(Network network, StartupMarginalGeneratorType startUpMarginalGeneratorType, double defaultAbatementCoefficient,
-                      double lossCoefficient, double pThreshold, double qThreshold, List<Generator> startupGroupsAtMaxActivePower) {
+    public void apply(Network network, StartupMarginalGeneratorType startupMarginalGeneratorType, double defaultReductionRatio,
+                      double lossFactor, double pThreshold, double qThreshold, List<Generator> startupGroupsAtMaxActivePower) {
         //parameters initialization
-        this.lossCoefficient = lossCoefficient;
-        this.defaultAbatementCoefficient = defaultAbatementCoefficient;
+        this.lossFactor = lossFactor;
+        this.defaultReductionRatio = defaultReductionRatio;
         this.pThreshold = pThreshold;
         this.qThreshold = qThreshold;
-        this.startUpMarginalGeneratorType = startUpMarginalGeneratorType;
-        this.startupGroupsAtMaxActivePower = startupGroupsAtMaxActivePower;
+        this.startupMarginalGeneratorType = startupMarginalGeneratorType;
+        this.startupGeneratorsAtMaxActivePower = startupGroupsAtMaxActivePower;
 
         // prepare startupGroupsPerConnectedComponent HashMap
         Map<Component, List<StartupGenerator>> startupGroupsPerConnectedComponent = prepareStartupGroupsPerConnectedComponent(network);
 
         // for each connected component
         startupGroupsPerConnectedComponent.keySet().forEach(component -> {
-            // create the startupZone for that connected component
+            // create the startupArea for that connected component
             StartupArea startupArea = StartupArea.builder()
                     .name("StartupZone" + component.getNum())
                     .num(component.getNum())
                     .startupType(StartupType.PRECEDENCE_ECONOMIC)
-                    .canStart(true)
+                    .isActive(true)
                     .countries(new ArrayList<>())
                     .startupGroups(startupGroupsPerConnectedComponent.get(component))
                     .startedGroups(new ArrayList<>())
                     .plannedActivePower(0)
                     .build();
 
-            // log component num
             LOGGER.debug("Component: {}", component.getNum());
 
-            evaluateConsumption(network, startupArea); // real consumption + losses
+            evaluateConsumption(network, startupArea); // active power consumption and losses
 
             if (startupArea.getStartupType() == StartupType.PRECEDENCE_ECONOMIC) {
-                economicalStacking(startupArea);
+                economicPrecedence(startupArea);
             }
 
-            if (startupArea.isCanStart()) {
-                final double[] startedProduction = {0};
+            if (startupArea.isActive()) {
+                final double[] plannedGeneration = {0};
 
-                startupArea.getStartedGroups().forEach(startupGroup -> {
-                    startupGroup.getGenerator().setTargetP(startupGroup.getActivePowerSetpoint());
-                    startedProduction[0] += startupGroup.getActivePowerSetpoint();
+                startupArea.getStartedGroups().forEach(startupGenerator -> {
+                    startupGenerator.getGenerator().setTargetP(startupGenerator.getActivePowerSetpoint());
+                    plannedGeneration[0] += startupGenerator.getActivePowerSetpoint();
 
-                    if ((startupGroup.getGenerator().getTargetP() >= pThreshold) &&
-                            (startupGroup.getGenerator().getReactiveLimits().getMaxQ(0) - startupGroup.getGenerator().getReactiveLimits().getMinQ(0) >= qThreshold)) {
-                        startupGroup.getGenerator().setVoltageRegulatorOn(true);
-                        LOGGER.info("Primary Voltage Control in operation");
+                    if ((startupGenerator.getGenerator().getTargetP() >= pThreshold) &&
+                            (startupGenerator.getGenerator().getReactiveLimits().getMaxQ(0) - startupGenerator.getGenerator().getReactiveLimits().getMinQ(0) >= qThreshold)) {
+                        startupGenerator.getGenerator().setVoltageRegulatorOn(true);
+                        LOGGER.info("Voltage control on for generator {}", startupGenerator.getGenerator().getId());
                     }
                 });
 
-                if (Math.abs(startedProduction[0] - startupArea.getTotalConsumption()) > 1)  {
-                    LOGGER.error("Wrong starting production units: load + loss = {} MW; started production {} MW", startupArea.getTotalConsumption(), startedProduction);
+                if (Math.abs(plannedGeneration[0] - startupArea.getTotalConsumption()) > 1)  {
+                    LOGGER.error("Wrong planned generation for area {}: consumption + loss = {} MW; planned generation {} MW", startupArea.getName(),
+                            startupArea.getTotalConsumption(), plannedGeneration);
                 }
             }
         });
@@ -112,16 +112,16 @@ public class GeneratorsStartupAlgorithm {
         return startupGroupsPerConnectedComponent;
     }
 
-    // compute area total consumption and active power losses
+    // compute area total consumption and total active power losses
     private void evaluateConsumption(Network network, StartupArea startupArea) {
         final double[] areaConsumption = {0};
         final double[] areaFictitiousConsumption = {0};
 
         network.getLoadStream().forEach(load -> {
             if (load.getTerminal().getBusView().getBus().getConnectedComponent().getNum() == startupArea.getNum()) {
-                areaConsumption[0] += load.getP0() * (1 + lossCoefficient);
+                areaConsumption[0] += load.getP0() * (1 + lossFactor);
                 if (load.getLoadType() == LoadType.FICTITIOUS) {
-                    areaFictitiousConsumption[0] += load.getP0() * (1 + lossCoefficient);
+                    areaFictitiousConsumption[0] += load.getP0() * (1 + lossFactor);
                 }
             }
         });
@@ -132,37 +132,35 @@ public class GeneratorsStartupAlgorithm {
         startupArea.setTotalConsumption(areaConsumption[0]);
     }
 
-    private void economicalStacking(StartupArea startupArea) {
-        double pMaxAvailable = 0;
+    private void economicPrecedence(StartupArea startupArea) {
+        // evaluate available production
+        double pMaxAvailable = evaluateGeneration(startupArea);
 
-        // Evaluate available production
-        pMaxAvailable = evaluateGeneration(startupArea);
-
-        // secondary connected component without neither imposed production nor consumption
+        // not main connected component without neither planned production or consumption
         if (startupArea.getNum() != 0 && Math.abs(startupArea.getTotalPlannedActivePower()) < 1. && Math.abs(startupArea.getTotalConsumption()) < 1) {
-            startupArea.setCanStart(false);
+            startupArea.setActive(false);
             return;
         }
 
         // verify that we can start groups
         if (startupArea.getTotalPlannedActivePower() + pMaxAvailable < startupArea.getTotalConsumption()) {
-            LOGGER.error("Starting production units impossible on area {} : too much imposed power or lack of production available", startupArea.getName());
+            LOGGER.error("Starting generators on area {} is not possible: too much planned active power compared to total available generation", startupArea.getName());
             if (startupArea.getNum() == 0) {
-                LOGGER.error("Principal connected component not treated");
+                LOGGER.error("Main connected component not treated");
             } else {
-                LOGGER.error("Secondary connected component not treated");
+                LOGGER.error("Connected component {} not treated", startupArea.getNum());
             }
-            startupArea.setCanStart(false);
+            startupArea.setActive(false);
             return;
         }
 
-        // economical stacking :
+        // economic precedence
         startupArea.getStartupGenerators().sort(new StartupGeneratorComparator());
 
-        double powerToBeStarted = startupArea.getTotalConsumption() - startupArea.getTotalPlannedActivePower();
-        LOGGER.info("Power to be started {}", powerToBeStarted);
+        double requiredActivePower = startupArea.getTotalConsumption() - startupArea.getTotalPlannedActivePower();
+        LOGGER.info("Required active power generation of {} MW for area {}", requiredActivePower, startupArea.getName());
 
-        updateGeneratorActivePowerSetpoints(startupArea, powerToBeStarted);
+        updateGeneratorActivePowerSetpoints(startupArea, requiredActivePower);
     }
 
     private void updateGeneratorActivePowerSetpoints(StartupArea startupArea, double requiredActivePower) {
@@ -173,15 +171,16 @@ public class GeneratorsStartupAlgorithm {
                 LOGGER.error("Generator {} is not available", startupGenerator.getGenerator().getNameOrId());
             }
 
-            if (startupGroupsAtMaxActivePower.contains(startupGenerator.getGenerator()) && !startupGenerator.isPlanned()) {
+            // if the generator has to be started at maximum available active power
+            if (startupGeneratorsAtMaxActivePower.contains(startupGenerator.getGenerator()) && !startupGenerator.isPlanned()) {
                 startupGenerator.setActivePowerSetpoint(startupGenerator.getAvailableActivePower());
                 activePowerToBeStarted -= startupGenerator.getAvailableActivePower();
                 startupArea.getStartedGroups().add(startupGenerator);
                 continue;
             }
 
+            // if the generator is not planned
             double pMin = startupGenerator.getGenerator().getMinP() < 0 ? startupGenerator.getGenerator().getMinP() : 0;
-
             if (!startupGenerator.isPlanned()) {
                 if (startupGenerator.getAvailableActivePower() < activePowerToBeStarted) {
                     activePowerToBeStarted -= startupGenerator.getAvailableActivePower();
@@ -204,7 +203,7 @@ public class GeneratorsStartupAlgorithm {
         final double[] pMaxAvailable = {0};
         for (StartupGenerator startupGenerator : startupArea.getStartupGenerators()) {
             GeneratorStartup generatorStartupExtension = startupGenerator.getGenerator().getExtension(GeneratorStartup.class);
-            if (generatorStartupExtension != null && generatorStartupExtension.getPlannedActivePowerSetpoint() != Double.MAX_VALUE) {
+            if (generatorStartupExtension != null && generatorStartupExtension.getPlannedActivePowerSetpoint() != 0) {
                 // compute the total planned generation
                 if (generatorStartupExtension.getPlannedActivePowerSetpoint() >= 0) {
                     startupArea.setTotalPlannedActivePower(startupArea.getTotalPlannedActivePower() + generatorStartupExtension.getPlannedActivePowerSetpoint());
@@ -212,7 +211,7 @@ public class GeneratorsStartupAlgorithm {
                     // if the generator has a negative active power set point, it is added to total consumption
                     startupArea.setTotalConsumption(startupArea.getTotalConsumption() - generatorStartupExtension.getPlannedActivePowerSetpoint());
                 }
-                startupGenerator.setAvailableActivePower(0); //FIXME: why?
+                startupGenerator.setAvailableActivePower(0); // cannot be started because already started
                 startupGenerator.setActivePowerSetpoint(generatorStartupExtension.getPlannedActivePowerSetpoint());
                 startupGenerator.setPlanned(true);
                 startupGenerator.setAvailable(true);
@@ -240,11 +239,11 @@ public class GeneratorsStartupAlgorithm {
         double plannedOutageRate = ext != null ? ext.getPlannedOutageRate() : -1; // FIXME (should be 0?)
         double forcedOutageRate = ext != null ? ext.getForcedOutageRate() : -1; // FIXME (should be 0?)
 
-        if (startupGroupsAtMaxActivePower.contains(startupGenerator.getGenerator())) {
+        if (startupGeneratorsAtMaxActivePower.contains(startupGenerator.getGenerator())) {
             pMaxAvailable = startupGenerator.getGenerator().getMaxP();
         } else if (plannedOutageRate == -1 || forcedOutageRate == -1) {
-            if (Math.abs(defaultAbatementCoefficient) < 1) {
-                pMaxAvailable = startupGenerator.getGenerator().getMaxP() * (1 - defaultAbatementCoefficient);
+            if (Math.abs(defaultReductionRatio) < 1) {
+                pMaxAvailable = startupGenerator.getGenerator().getMaxP() * (1 - defaultReductionRatio);
             } else {
                 pMaxAvailable = startupGenerator.getGenerator().getMaxP();
             }
@@ -252,22 +251,22 @@ public class GeneratorsStartupAlgorithm {
             pMaxAvailable  = startupGenerator.getGenerator().getMaxP() * (1 - forcedOutageRate) * (1 - plannedOutageRate);
         }
 
-        double adequacyRatio = computeAdequacyRatio(startupGenerator);
+        double adequacyRatio = computeAdequacyMarginRatio(startupGenerator);
         pMaxAvailable *= 1 - adequacyRatio;
         return pMaxAvailable;
     }
 
-    private double computeAdequacyRatio(StartupGenerator startupGenerator) {
+    private double computeAdequacyMarginRatio(StartupGenerator startupGenerator) {
         // ratio of active generation to be kept for frequency reserve.
-        double generatorAdequacyRatio = 0;
+        double generatorAdequacyMarginRatio = 0;
 
         switch (startupGenerator.getGenerator().getEnergySource()) {
-            case HYDRO: generatorAdequacyRatio = hydroBandSetting; break;
-            case NUCLEAR: generatorAdequacyRatio = nuclearBandSetting; break;
-            case THERMAL: generatorAdequacyRatio = thermalBandSetting; break;
-            default: generatorAdequacyRatio = 0;
+            case HYDRO: generatorAdequacyMarginRatio = hydroAdequacyMarginRatio; break;
+            case NUCLEAR: generatorAdequacyMarginRatio = nuclearAdequacyMarginRatio; break;
+            case THERMAL: generatorAdequacyMarginRatio = thermalAdequacyMarginRatio; break;
+            default: generatorAdequacyMarginRatio = 0;
         }
-        return generatorAdequacyRatio;
+        return generatorAdequacyMarginRatio;
     }
 }
 
