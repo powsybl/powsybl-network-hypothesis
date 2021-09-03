@@ -18,7 +18,7 @@ import static org.junit.Assert.*;
 /**
  * @author Chamseddine BENHAMED <chamseddine.benhamed at rte-france.com>
  */
-public class StartupGroupComparatorTest {
+public class StartupGeneratorComparatorTest {
 
     @Test
     public void allGeneratorsHavingExtension() {
@@ -32,44 +32,44 @@ public class StartupGroupComparatorTest {
         assertNotNull(generator3);
 
         generator1.newExtension(GeneratorStartupAdder.class)
-                .withPredefinedActivePowerSetpoint(90f)
-                .withStartUpCost(20f)
+                .withPlannedActivePowerSetpoint(90f)
+                .withStartupCost(20f)
                 .withMarginalCost(10f)
                 .withPlannedOutageRate(0.2f)
                 .withForcedOutageRate(0.8f)
                 .add();
         generator2.newExtension(GeneratorStartupAdder.class)
-                .withPredefinedActivePowerSetpoint(100f)
-                .withStartUpCost(5f)
+                .withPlannedActivePowerSetpoint(100f)
+                .withStartupCost(5f)
                 .withMarginalCost(9f)
                 .withPlannedOutageRate(0.7f)
                 .withForcedOutageRate(0.1f)
                 .add();
         generator3.newExtension(GeneratorStartupAdder.class)
-                .withPredefinedActivePowerSetpoint(50f)
-                .withStartUpCost(11f)
+                .withPlannedActivePowerSetpoint(50f)
+                .withStartupCost(11f)
                 .withMarginalCost(10f)
                 .withPlannedOutageRate(0.4f)
                 .withForcedOutageRate(0.3f)
                 .add();
 
-        StartupGroup startupGroup1 = new StartupGroup();
-        startupGroup1.setGenerator(generator1);
-        StartupGroup startupGroup2 = new StartupGroup();
-        startupGroup2.setGenerator(generator2);
-        StartupGroup startupGroup3 = new StartupGroup();
-        startupGroup3.setGenerator(generator3);
+        StartupGenerator startupGenerator1 = new StartupGenerator();
+        startupGenerator1.setGenerator(generator1);
+        StartupGenerator startupGenerator2 = new StartupGenerator();
+        startupGenerator2.setGenerator(generator2);
+        StartupGenerator startupGenerator3 = new StartupGenerator();
+        startupGenerator3.setGenerator(generator3);
 
-        List<StartupGroup> startupGroups = new ArrayList<>();
-        startupGroups.add(startupGroup1);
-        startupGroups.add(startupGroup2);
-        startupGroups.add(startupGroup3);
+        List<StartupGenerator> startupGenerators = new ArrayList<>();
+        startupGenerators.add(startupGenerator1);
+        startupGenerators.add(startupGenerator2);
+        startupGenerators.add(startupGenerator3);
 
-        startupGroups.sort(new StartupGroupComparator());
+        startupGenerators.sort(new StartupGeneratorComparator());
 
-        assertEquals("G2", startupGroups.get(0).getGenerator().getNameOrId());
-        assertEquals("G3", startupGroups.get(1).getGenerator().getNameOrId());
-        assertEquals("G1", startupGroups.get(2).getGenerator().getNameOrId());
+        assertEquals("G2", startupGenerators.get(0).getGenerator().getNameOrId());
+        assertEquals("G3", startupGenerators.get(1).getGenerator().getNameOrId());
+        assertEquals("G1", startupGenerators.get(2).getGenerator().getNameOrId());
     }
 
     @Test
@@ -84,38 +84,38 @@ public class StartupGroupComparatorTest {
         assertNotNull(generator3);
 
         generator1.newExtension(GeneratorStartupAdder.class)
-                .withPredefinedActivePowerSetpoint(90f)
-                .withStartUpCost(20f)
+                .withPlannedActivePowerSetpoint(90f)
+                .withStartupCost(20f)
                 .withMarginalCost(10f)
                 .withPlannedOutageRate(0.2f)
                 .withForcedOutageRate(0.8f)
                 .add();
 
         generator3.newExtension(GeneratorStartupAdder.class)
-                .withPredefinedActivePowerSetpoint(50f)
-                .withStartUpCost(11f)
+                .withPlannedActivePowerSetpoint(50f)
+                .withStartupCost(11f)
                 .withMarginalCost(10f)
                 .withPlannedOutageRate(0.4f)
                 .withForcedOutageRate(0.3f)
                 .add();
 
-        StartupGroup startupGroup1 = new StartupGroup();
-        startupGroup1.setGenerator(generator1);
-        StartupGroup startupGroup2 = new StartupGroup();
-        startupGroup2.setGenerator(generator2);
-        StartupGroup startupGroup3 = new StartupGroup();
-        startupGroup3.setGenerator(generator3);
+        StartupGenerator startupGenerator1 = new StartupGenerator();
+        startupGenerator1.setGenerator(generator1);
+        StartupGenerator startupGenerator2 = new StartupGenerator();
+        startupGenerator2.setGenerator(generator2);
+        StartupGenerator startupGenerator3 = new StartupGenerator();
+        startupGenerator3.setGenerator(generator3);
 
-        List<StartupGroup> startupGroups = new ArrayList<>();
-        startupGroups.add(startupGroup1);
-        startupGroups.add(startupGroup2);
-        startupGroups.add(startupGroup3);
+        List<StartupGenerator> startupGenerators = new ArrayList<>();
+        startupGenerators.add(startupGenerator1);
+        startupGenerators.add(startupGenerator2);
+        startupGenerators.add(startupGenerator3);
 
-        startupGroups.sort(new StartupGroupComparator());
+        startupGenerators.sort(new StartupGeneratorComparator());
 
-        assertEquals("G3", startupGroups.get(0).getGenerator().getNameOrId());
-        assertEquals("G1", startupGroups.get(1).getGenerator().getNameOrId());
-        assertEquals("G2", startupGroups.get(2).getGenerator().getNameOrId());
+        assertEquals("G3", startupGenerators.get(0).getGenerator().getNameOrId());
+        assertEquals("G1", startupGenerators.get(1).getGenerator().getNameOrId());
+        assertEquals("G2", startupGenerators.get(2).getGenerator().getNameOrId());
     }
 
     private static Network createTestNetwork() {
