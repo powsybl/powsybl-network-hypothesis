@@ -17,11 +17,11 @@ import java.util.List;
 public class StartupAreaBuilder {
     private String name;
     private int num;
-    private StartupType startupType = StartupType.PRECEDENCE_ECONOMIC;
+    private StartupType startupType = StartupType.ECONOMIC_PRECEDENCE;
     private boolean active = true; // meaning not clear.
     private List<Country> countries = new ArrayList<>(); // This attribute is not used for the first version
-    private List<StartupGenerator> startupGenerators = new ArrayList<>(); // groupsToBeStarted?
-    private List<StartupGenerator> startedGroups = new ArrayList<>();
+    private List<GeneratorState> startupGenerators = new ArrayList<>(); // groupsToBeStarted?
+    private List<GeneratorState> startedGroups = new ArrayList<>();
     private double totalPlannedActivePower = 0; // FIXME?
     private double totalConsumption = 0;
 
@@ -50,12 +50,12 @@ public class StartupAreaBuilder {
         return this;
     }
 
-    public StartupAreaBuilder startupGroups(List<StartupGenerator> startupGenerators) {
+    public StartupAreaBuilder startupGroups(List<GeneratorState> startupGenerators) {
         this.startupGenerators = startupGenerators;
         return this;
     }
 
-    public StartupAreaBuilder startedGroups(List<StartupGenerator> startedGroups) {
+    public StartupAreaBuilder startedGroups(List<GeneratorState> startedGroups) {
         this.startedGroups = startedGroups;
         return this;
     }

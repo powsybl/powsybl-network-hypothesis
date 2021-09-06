@@ -10,6 +10,6 @@ package com.powsybl.network.hypothesis;
  * @author Chamseddine BENHAMED <chamseddine.benhamed at rte-france.com>
  */
 public enum StartupType {
-    PRECEDENCE_ECONOMIC
+    ECONOMIC_PRECEDENCE
 }
 

@@ -11,9 +11,9 @@ import java.util.Comparator;
 /**
  * @author Chamseddine BENHAMED <chamseddine.benhamed at rte-france.com>
  */
-public class StartupGeneratorComparator implements Comparator<StartupGenerator> {
+public class StartupGeneratorComparator implements Comparator<GeneratorState> {
     @Override
-    public int compare(StartupGenerator startupGenerator1, StartupGenerator startupGenerator2) {
+    public int compare(GeneratorState startupGenerator1, GeneratorState startupGenerator2) {
 
         double cost1 = startupGenerator1.getGenerator().getExtension(GeneratorStartup.class) != null ? startupGenerator1.getGenerator().getExtension(GeneratorStartup.class).getStartupCost() : Double.MAX_VALUE;
         double cost2 = startupGenerator2.getGenerator().getExtension(GeneratorStartup.class) != null ? startupGenerator2.getGenerator().getExtension(GeneratorStartup.class).getStartupCost() : Double.MAX_VALUE;

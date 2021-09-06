@@ -18,7 +18,7 @@ import static org.junit.Assert.*;
 /**
  * @author Chamseddine BENHAMED <chamseddine.benhamed at rte-france.com>
  */
-public class StartupGeneratorComparatorTest {
+public class GeneratorStateComparatorTest {
 
     @Test
     public void allGeneratorsHavingExtension() {
@@ -53,14 +53,14 @@ public class StartupGeneratorComparatorTest {
                 .withForcedOutageRate(0.3)
                 .add();
 
-        StartupGenerator startupGenerator1 = new StartupGenerator();
+        GeneratorState startupGenerator1 = new GeneratorState();
         startupGenerator1.setGenerator(generator1);
-        StartupGenerator startupGenerator2 = new StartupGenerator();
+        GeneratorState startupGenerator2 = new GeneratorState();
         startupGenerator2.setGenerator(generator2);
-        StartupGenerator startupGenerator3 = new StartupGenerator();
+        GeneratorState startupGenerator3 = new GeneratorState();
         startupGenerator3.setGenerator(generator3);
 
-        List<StartupGenerator> startupGenerators = new ArrayList<>();
+        List<GeneratorState> startupGenerators = new ArrayList<>();
         startupGenerators.add(startupGenerator1);
         startupGenerators.add(startupGenerator2);
         startupGenerators.add(startupGenerator3);
@@ -99,14 +99,14 @@ public class StartupGeneratorComparatorTest {
                 .withForcedOutageRate(0.3)
                 .add();
 
-        StartupGenerator startupGenerator1 = new StartupGenerator();
+        GeneratorState startupGenerator1 = new GeneratorState();
         startupGenerator1.setGenerator(generator1);
-        StartupGenerator startupGenerator2 = new StartupGenerator();
+        GeneratorState startupGenerator2 = new GeneratorState();
         startupGenerator2.setGenerator(generator2);
-        StartupGenerator startupGenerator3 = new StartupGenerator();
+        GeneratorState startupGenerator3 = new GeneratorState();
         startupGenerator3.setGenerator(generator3);
 
-        List<StartupGenerator> startupGenerators = new ArrayList<>();
+        List<GeneratorState> startupGenerators = new ArrayList<>();
         startupGenerators.add(startupGenerator1);
         startupGenerators.add(startupGenerator2);
         startupGenerators.add(startupGenerator3);
