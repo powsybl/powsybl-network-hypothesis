@@ -164,11 +164,9 @@ public class StartupArea {
                     startupGenerator.setAvailable(false);
                     continue;
                 }
-                double generatorPMaxAvailable = startupGeneratorsAtMaxActivePower.contains(startupGenerator.getGenerator()) ? startupGenerator.getGenerator().getMaxP() :
-                        startupGenerator.evaluatePMaxAvailable(defaultReductionRatio);
+                double generatorPMaxAvailable = startupGenerator.evaluatePMaxAvailable(defaultReductionRatio,
+                        startupGeneratorsAtMaxActivePower.contains(startupGenerator.getGenerator()));
                 pMaxAvailable[0] += generatorPMaxAvailable;
-                startupGenerator.setAvailableActivePower(generatorPMaxAvailable);
-                startupGenerator.setAvailable(true);
             }
         }
         return pMaxAvailable[0];

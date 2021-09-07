@@ -73,27 +73,21 @@ public class GeneratorState {
         this.generator = generator;
     }
 
-    public double evaluatePMaxAvailable(double defaultReductionRatio) {
-        double pMaxAvailable = 0; //FIXME
-
-        GeneratorStartup generatorStartup = generator.getExtension(GeneratorStartup.class);
-
-        double plannedOutageRate = generatorStartup != null ? generatorStartup.getPlannedOutageRate() : -1;
-        double forcedOutageRate = generatorStartup != null ? generatorStartup.getForcedOutageRate() : -1;
-
-        // check if the group should started at pMax in parameters
-        if (plannedOutageRate == -1 || forcedOutageRate == -1) {
-            if (Math.abs(defaultReductionRatio) < 1) {
-                pMaxAvailable = generator.getMaxP() * (1 - defaultReductionRatio);
-            } else {
-                pMaxAvailable = generator.getMaxP();
-            }
+    public double evaluatePMaxAvailable(double defaultReductionRatio, boolean isMaxP) {
+        double pMaxAvailable;
+        if (isMaxP) {
+            pMaxAvailable = generator.getMaxP();
         } else {
-            pMaxAvailable = generator.getMaxP() * (1 - forcedOutageRate) * (1 - plannedOutageRate);
+            GeneratorStartup generatorStartup = generator.getExtension(GeneratorStartup.class);
+            pMaxAvailable = Math.abs(defaultReductionRatio) < 1 ? generator.getMaxP() * (1 - defaultReductionRatio) : generator.getMaxP();
+            double plannedOutageRate = generatorStartup != null ? generatorStartup.getPlannedOutageRate() : 0;
+            double forcedOutageRate = generatorStartup != null ? generatorStartup.getForcedOutageRate() : 0;
+            pMaxAvailable *= (1 - forcedOutageRate) * (1 - plannedOutageRate);
+            double adequacyRatio = this.computeAdequacyMarginRatio();
+            pMaxAvailable *= 1 - adequacyRatio;
         }
-
-        double adequacyRatio = this.computeAdequacyMarginRatio();
-        pMaxAvailable *= 1 - adequacyRatio;
+        this.availableActivePower = pMaxAvailable;
+        this.available = true;
         return pMaxAvailable;
     }
 
