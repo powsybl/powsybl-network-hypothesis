@@ -37,4 +37,12 @@ public class HypothesisUtilsTest extends AbstractConverterTest {
         HypothesisUtils.createVoltageLevelOnLine(network.getLine("CJ"));
         roundTripTest(network, NetworkXml::writeAndValidate, NetworkXml::validateAndRead, "/fictitious-switch-line-split.xml");
     }
+
+    @Test
+    public void testMixed() throws IOException {
+        Network network = EurostagTutorialExample1Factory.create();
+        network.setCaseDate(DateTime.parse("2021-08-27T14:44:56.567+02:00"));
+        HypothesisUtils.createVoltageLevelOnLine(network.getLine("NHV1_NHV2_1"), TopologyKind.NODE_BREAKER);
+        roundTripXmlTest(network, NetworkXml::writeAndValidate, NetworkXml::validateAndRead, "/eurostag-line-split-nb.xml");
+    }
 }
