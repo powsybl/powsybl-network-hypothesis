@@ -8,6 +8,7 @@ package com.powsybl.network.hypothesis;
 
 import com.powsybl.commons.AbstractConverterTest;
 import com.powsybl.iidm.network.Network;
+import com.powsybl.iidm.network.TopologyKind;
 import com.powsybl.iidm.network.test.EurostagTutorialExample1Factory;
 import com.powsybl.iidm.network.test.FictitiousSwitchFactory;
 import com.powsybl.iidm.xml.NetworkXml;
@@ -25,7 +26,7 @@ public class HypothesisUtilsTest extends AbstractConverterTest {
     public void testBb() throws IOException {
         Network network = EurostagTutorialExample1Factory.create();
         network.setCaseDate(DateTime.parse("2021-08-27T14:44:56.567+02:00"));
-        HypothesisUtils.createVoltageLevelOnLine(network.getLine("NHV1_NHV2_1"));
+        HypothesisUtils.createVoltageLevelOnLine(network.getLine("NHV1_NHV2_1"), TopologyKind.BUS_BREAKER);
         roundTripXmlTest(network, NetworkXml::writeAndValidate, NetworkXml::validateAndRead, "/eurostag-line-split.xml");
     }
 

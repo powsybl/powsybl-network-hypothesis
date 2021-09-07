@@ -24,11 +24,23 @@ public final class HypothesisUtils {
      * <code>r2 = 0.5 * r</code><br>
      * If the line is between two BUS-BREAKER voltage levels, the fictitious voltage level will be BUS-BREAKER and the two new lines
      * will be linked to a fictitious bus in this voltage level.<br>
-     * If the line is between the two NODE-BREAKER voltage levels, the fictitious voltage level will be NODE_BREAKER and the
-     * two lines will be linked via an internal connection between two nodes in this voltage level.
+     * The created voltage level will be NODE_BREAKER.
      */
     public static void createVoltageLevelOnLine(Line line) {
-        createVoltageLevelOnLine(0.5, 0.5, 0.5, 0.5, 0.5, 0.5, line);
+        createVoltageLevelOnLine(line, TopologyKind.NODE_BREAKER);
+    }
+
+    /**
+     * Split a given line and create a fictitious voltage level at the junction.<br>
+     * The line is considered split in half such as this:<br>
+     * <code>r1 = 0.5 * r</code><br>
+     * <code>r2 = 0.5 * r</code><br>
+     * If the line is between two BUS-BREAKER voltage levels, the fictitious voltage level will be BUS-BREAKER and the two new lines
+     * will be linked to a fictitious bus in this voltage level.<br>
+     * The created voltage level will have the given topology kind.
+     */
+    public static void createVoltageLevelOnLine(Line line, TopologyKind topologyKind) {
+        createVoltageLevelOnLine(0.5, 0.5, 0.5, 0.5, 0.5, 0.5, line, topologyKind);
     }
 
     /**
@@ -38,15 +50,10 @@ public final class HypothesisUtils {
      * <code>r2 = (1 - rdp) * r</code><br>
      * If the line is between two BUS-BREAKER voltage levels, the fictitious voltage level will be BUS-BREAKER and the two new lines
      * will be linked to a fictitious bus in this voltage level.<br>
-     * If the line is between the two NODE-BREAKER voltage levels, the fictitious voltage level will be NODE_BREAKER and the
-     * two lines will be linked via an internal connection between two nodes in this voltage level.
+     * The created voltage level will have the given topology kind.
      */
     public static void createVoltageLevelOnLine(double rdp, double xdp, double g1dp, double b1dp, double g2dp, double b2dp,
-                                                Line line) {
-        TopologyKind topologyKind = line.getTerminal1().getVoltageLevel().getTopologyKind();
-        if (topologyKind != line.getTerminal2().getVoltageLevel().getTopologyKind()) {
-            throw new AssertionError();
-        }
+                                                Line line, TopologyKind topologyKind) {
         Network network = line.getNetwork();
         Substation substation = network.newSubstation()
                 .setId(line.getId() + "_SUBSTATION")
