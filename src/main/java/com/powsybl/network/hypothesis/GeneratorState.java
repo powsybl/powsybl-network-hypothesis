@@ -79,13 +79,17 @@ public class GeneratorState {
             pMaxAvailable = generator.getMaxP();
         } else {
             GeneratorStartup generatorStartup = generator.getExtension(GeneratorStartup.class);
-            pMaxAvailable = Math.abs(defaultReductionRatio) < 1 ? generator.getMaxP() * (1 - defaultReductionRatio) : generator.getMaxP();
+            pMaxAvailable = generator.getMaxP();
             double plannedOutageRate = generatorStartup != null ? generatorStartup.getPlannedOutageRate() : 0;
             double forcedOutageRate = generatorStartup != null ? generatorStartup.getForcedOutageRate() : 0;
-            pMaxAvailable *= (1 - forcedOutageRate) * (1 - plannedOutageRate);
-            double adequacyRatio = this.computeAdequacyMarginRatio();
-            pMaxAvailable *= 1 - adequacyRatio;
+            if (plannedOutageRate != 0 || forcedOutageRate != 0) {
+                pMaxAvailable *= (1 - forcedOutageRate) * (1 - plannedOutageRate);
+            } else {
+                pMaxAvailable *= 1 - defaultReductionRatio;
+            }
         }
+        double adequacyRatio = this.computeAdequacyMarginRatio();
+        pMaxAvailable *= 1 - adequacyRatio;
         this.availableActivePower = pMaxAvailable;
         this.available = true;
         return pMaxAvailable;
