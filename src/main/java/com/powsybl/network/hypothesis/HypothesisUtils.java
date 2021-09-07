@@ -125,7 +125,6 @@ public final class HypothesisUtils {
             Bus bus = terminal.getBusBreakerView().getBus();
             if (bus != null) {
                 busSetter.accept(bus, adder);
-                adder.setBus1(bus.getId());
             }
         } else if (terminal.getVoltageLevel().getTopologyKind() == TopologyKind.NODE_BREAKER) {
             int node = terminal.getNodeBreakerView().getNode();
