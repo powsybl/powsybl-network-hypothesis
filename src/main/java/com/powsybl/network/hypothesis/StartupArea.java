@@ -27,7 +27,6 @@ public class StartupArea {
     private List<GeneratorState> startedGroups = new ArrayList<>();
     private double totalPlannedActivePower = 0;
     private double totalConsumption = 0;
-    double defaultReductionRatio = 0.1; // default ratio that defines the global reduction of active power availability
 
     public static StartupAreaBuilder builder() {
         return new StartupAreaBuilder();
@@ -164,8 +163,7 @@ public class StartupArea {
                     startupGenerator.setAvailable(false);
                     continue;
                 }
-                double generatorPMaxAvailable = startupGenerator.evaluatePMaxAvailable(defaultReductionRatio,
-                        startupGeneratorsAtMaxActivePower.contains(startupGenerator.getGenerator()));
+                double generatorPMaxAvailable = startupGenerator.evaluatePMaxAvailable(startupGeneratorsAtMaxActivePower.contains(startupGenerator.getGenerator()));
                 pMaxAvailable[0] += generatorPMaxAvailable;
             }
         }

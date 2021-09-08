@@ -18,6 +18,7 @@ public class GeneratorState {
     private boolean planned = false;
     private Generator generator;
     // parameters
+    double defaultReductionRatio = 0.1; // default ratio that defines the global reduction of active power availability
     private double nuclearAdequacyMarginRatio = 0.05; // the ratio of generation reserved for adequacy for nuclear units
     private double thermalAdequacyMarginRatio = 0.05; // the ratio of generation reserved for adequacy for thermal units
     private double hydroAdequacyMarginRatio = 0.1; // the ratio of generation reserved for adequacy for hydro units
@@ -73,13 +74,10 @@ public class GeneratorState {
         this.generator = generator;
     }
 
-    public double evaluatePMaxAvailable(double defaultReductionRatio, boolean isMaxP) {
-        double pMaxAvailable;
-        if (isMaxP) {
-            pMaxAvailable = generator.getMaxP();
-        } else {
+    public double evaluatePMaxAvailable(boolean isMaxP) {
+        double pMaxAvailable = generator.getMaxP();
+        if (!isMaxP) {
             GeneratorStartup generatorStartup = generator.getExtension(GeneratorStartup.class);
-            pMaxAvailable = generator.getMaxP();
             double plannedOutageRate = generatorStartup != null ? generatorStartup.getPlannedOutageRate() : 0;
             double forcedOutageRate = generatorStartup != null ? generatorStartup.getForcedOutageRate() : 0;
             if (plannedOutageRate != 0 || forcedOutageRate != 0) {
@@ -97,7 +95,7 @@ public class GeneratorState {
 
     private double computeAdequacyMarginRatio() {
         // ratio of active generation to be kept for frequency reserve.
-        double generatorAdequacyMarginRatio = 0;
+        double generatorAdequacyMarginRatio;
 
         switch (generator.getEnergySource()) {
             case HYDRO: generatorAdequacyMarginRatio = hydroAdequacyMarginRatio; break;
