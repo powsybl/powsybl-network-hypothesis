@@ -15,7 +15,7 @@ import java.util.function.BiConsumer;
  *
  * @author Miora Ralambotiana <miora.ralambotiana at rte-france.com>
  */
-public final class HypothesisUtils {
+public final class TopologyHypothesisUtils {
 
     /**
      * Split a given line and create a fictitious voltage level at the junction.<br>
@@ -238,6 +238,6 @@ public final class HypothesisUtils {
         }
     }
 
-    private HypothesisUtils() {
+    private TopologyHypothesisUtils() {
     }
 }

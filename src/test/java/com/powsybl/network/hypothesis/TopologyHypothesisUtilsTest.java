@@ -20,13 +20,13 @@ import java.io.IOException;
 /**
  * @author Miora Ralambotiana <miora.ralambotiana at rte-france.com>
  */
-public class HypothesisUtilsTest extends AbstractConverterTest {
+public class TopologyHypothesisUtilsTest extends AbstractConverterTest {
 
     @Test
     public void testBb() throws IOException {
         Network network = EurostagTutorialExample1Factory.create();
         network.setCaseDate(DateTime.parse("2021-08-27T14:44:56.567+02:00"));
-        HypothesisUtils.createVoltageLevelOnLine(network.getLine("NHV1_NHV2_1"), TopologyKind.BUS_BREAKER);
+        TopologyHypothesisUtils.createVoltageLevelOnLine(network.getLine("NHV1_NHV2_1"), TopologyKind.BUS_BREAKER);
         roundTripXmlTest(network, NetworkXml::writeAndValidate, NetworkXml::validateAndRead, "/eurostag-line-split.xml");
     }
 
@@ -34,7 +34,7 @@ public class HypothesisUtilsTest extends AbstractConverterTest {
     public void testNb() throws IOException {
         Network network = FictitiousSwitchFactory.create();
         network.setCaseDate(DateTime.parse("2021-08-27T14:44:56.567+02:00"));
-        HypothesisUtils.createVoltageLevelOnLine(network.getLine("CJ"));
+        TopologyHypothesisUtils.createVoltageLevelOnLine(network.getLine("CJ"));
         roundTripXmlTest(network, NetworkXml::writeAndValidate, NetworkXml::validateAndRead, "/fictitious-switch-line-split.xml");
     }
 
@@ -42,7 +42,7 @@ public class HypothesisUtilsTest extends AbstractConverterTest {
     public void testMixed() throws IOException {
         Network network = EurostagTutorialExample1Factory.create();
         network.setCaseDate(DateTime.parse("2021-08-27T14:44:56.567+02:00"));
-        HypothesisUtils.createVoltageLevelOnLine(network.getLine("NHV1_NHV2_1"), TopologyKind.NODE_BREAKER);
+        TopologyHypothesisUtils.createVoltageLevelOnLine(network.getLine("NHV1_NHV2_1"), TopologyKind.NODE_BREAKER);
         roundTripXmlTest(network, NetworkXml::writeAndValidate, NetworkXml::validateAndRead, "/eurostag-line-split-nb.xml");
     }
 
@@ -50,7 +50,7 @@ public class HypothesisUtilsTest extends AbstractConverterTest {
     public void testBbWithBreakers() throws IOException {
         Network network = EurostagTutorialExample1Factory.create();
         network.setCaseDate(DateTime.parse("2021-08-27T14:44:56.567+02:00"));
-        HypothesisUtils.createVoltageLevelOnLine(network.getLine("NHV1_NHV2_1"), TopologyKind.BUS_BREAKER, true);
+        TopologyHypothesisUtils.createVoltageLevelOnLine(network.getLine("NHV1_NHV2_1"), TopologyKind.BUS_BREAKER, true);
         roundTripXmlTest(network, NetworkXml::writeAndValidate, NetworkXml::validateAndRead, "/eurostag-line-split-with-breakers.xml");
     }
 
@@ -58,7 +58,7 @@ public class HypothesisUtilsTest extends AbstractConverterTest {
     public void testNbWithBreakers() throws IOException {
         Network network = FictitiousSwitchFactory.create();
         network.setCaseDate(DateTime.parse("2021-08-27T14:44:56.567+02:00"));
-        HypothesisUtils.createVoltageLevelOnLine(network.getLine("CJ"), true);
+        TopologyHypothesisUtils.createVoltageLevelOnLine(network.getLine("CJ"), true);
         roundTripXmlTest(network, NetworkXml::writeAndValidate, NetworkXml::validateAndRead, "/fictitious-switch-line-split-with-breakers.xml");
     }
 }
