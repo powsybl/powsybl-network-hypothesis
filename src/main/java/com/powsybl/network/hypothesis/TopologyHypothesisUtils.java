@@ -184,6 +184,7 @@ public final class TopologyHypothesisUtils {
             }
         } else if (topologyKind == TopologyKind.NODE_BREAKER) {
             adder1.setNode2(0);
+            adder2.setNode1(2);
             if (withBreakers) {
                 voltageLevel.getNodeBreakerView()
                         .newSwitch()
@@ -205,14 +206,23 @@ public final class TopologyHypothesisUtils {
                         .setNode1(1)
                         .setNode2(2)
                         .add();
-                adder2.setNode1(2);
+                voltageLevel.getNodeBreakerView()
+                        .newBusbarSection()
+                        .setId(line.getId() + "_BBS")
+                        .setEnsureIdUnicity(true)
+                        .setNode(1)
+                        .add();
             } else {
                 voltageLevel.getNodeBreakerView()
                         .newInternalConnection()
                         .setNode1(0)
                         .setNode2(1)
                         .add();
-                adder2.setNode1(1);
+                voltageLevel.getNodeBreakerView()
+                        .newInternalConnection()
+                        .setNode1(1)
+                        .setNode2(2)
+                        .add();
             }
         } else {
             throw new AssertionError();

@@ -35,7 +35,7 @@ public class TopologyHypothesisUtilsTest extends AbstractConverterTest {
         Network network = FictitiousSwitchFactory.create();
         network.setCaseDate(DateTime.parse("2021-08-27T14:44:56.567+02:00"));
         TopologyHypothesisUtils.createVoltageLevelOnLine(network.getLine("CJ"));
-        roundTripXmlTest(network, NetworkXml::writeAndValidate, NetworkXml::validateAndRead, "/fictitious-switch-line-split.xml");
+        roundTripTest(network, NetworkXml::writeAndValidate, NetworkXml::validateAndRead, "/fictitious-switch-line-split.xml");
     }
 
     @Test
@@ -43,7 +43,7 @@ public class TopologyHypothesisUtilsTest extends AbstractConverterTest {
         Network network = EurostagTutorialExample1Factory.create();
         network.setCaseDate(DateTime.parse("2021-08-27T14:44:56.567+02:00"));
         TopologyHypothesisUtils.createVoltageLevelOnLine(network.getLine("NHV1_NHV2_1"), TopologyKind.NODE_BREAKER);
-        roundTripXmlTest(network, NetworkXml::writeAndValidate, NetworkXml::validateAndRead, "/eurostag-line-split-nb.xml");
+        roundTripTest(network, NetworkXml::writeAndValidate, NetworkXml::validateAndRead, "/eurostag-line-split-nb.xml");
     }
 
     @Test
@@ -59,6 +59,6 @@ public class TopologyHypothesisUtilsTest extends AbstractConverterTest {
         Network network = FictitiousSwitchFactory.create();
         network.setCaseDate(DateTime.parse("2021-08-27T14:44:56.567+02:00"));
         TopologyHypothesisUtils.createVoltageLevelOnLine(network.getLine("CJ"), true);
-        roundTripXmlTest(network, NetworkXml::writeAndValidate, NetworkXml::validateAndRead, "/fictitious-switch-line-split-with-breakers.xml");
+        roundTripTest(network, NetworkXml::writeAndValidate, NetworkXml::validateAndRead, "/fictitious-switch-line-split-with-breakers.xml");
     }
 }
