@@ -15,18 +15,15 @@ import java.util.*;
 /**
  * @author Chamseddine BENHAMED <chamseddine.benhamed at rte-france.com>
  */
-public class GeneratorsStartupHypothesis {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GeneratorsStartupHypothesis.class);
+public final class SteadyStateHypothesisUtils {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SteadyStateHypothesisUtils.class);
 
-    List<Generator> startupGeneratorsAtMaxActivePower = new ArrayList<>(); // list of generators that should be started at maxP if chosen
+    private SteadyStateHypothesisUtils() {
+    }
 
-    double lossFactor = 0; // the factor of active power losses in the whole network
-
-    StartupMarginalGeneratorType startupMarginalGeneratorType = StartupMarginalGeneratorType.BASIC;
-
-    // thresholds for voltage control
-    double pThreshold = 0.0;
-    double qThreshold = 0.0;
+    public static void startUpGenerators(Network network) {
+        startUpGenerators(network, StartupMarginalGeneratorType.BASIC, 0.0, 0.0, 0.0, new ArrayList<>());
+    }
 
     /**
      * starts generators groups using Classic or Mexico algorithm
@@ -35,16 +32,10 @@ public class GeneratorsStartupHypothesis {
      * @param lossFactor the coefficient of active power losses
      * @param pThreshold pThreshold parameter
      * @param qThreshold qThreshold parameter
-     * @param startupGroupsAtMaxActivePower list of generators that should be started at maxP if chosen
+     * @param startupGeneratorsAtMaxActivePower list of generators that should be started at maxP if chosen
      */
-    public void apply(Network network, StartupMarginalGeneratorType startupMarginalGeneratorType, double lossFactor,
-                      double pThreshold, double qThreshold, List<Generator> startupGroupsAtMaxActivePower) {
-        //parameters initialization
-        this.lossFactor = lossFactor;
-        this.pThreshold = pThreshold;
-        this.qThreshold = qThreshold;
-        this.startupMarginalGeneratorType = startupMarginalGeneratorType;
-        this.startupGeneratorsAtMaxActivePower = startupGroupsAtMaxActivePower;
+    public static void startUpGenerators(Network network, StartupMarginalGeneratorType startupMarginalGeneratorType, double lossFactor,
+                                         double pThreshold, double qThreshold, List<Generator> startupGeneratorsAtMaxActivePower) { // TODO Use startupMarginalGeneratorType
 
         // prepare startupGroupsPerConnectedComponent HashMap
         Map<Component, List<GeneratorState>> startupGroupsPerConnectedComponent = prepareStartupGroupsPerConnectedComponent(network);
@@ -68,7 +59,7 @@ public class GeneratorsStartupHypothesis {
             startupArea.evaluateConsumption(network, lossFactor); // active power consumption and losses
 
             if (startupArea.getStartupType() == StartupType.ECONOMIC_PRECEDENCE) {
-                economicPrecedence(startupArea);
+                economicPrecedence(startupArea, startupGeneratorsAtMaxActivePower);
             }
 
             if (startupArea.isActive()) {
@@ -94,7 +85,7 @@ public class GeneratorsStartupHypothesis {
         });
     }
 
-    private Map<Component, List<GeneratorState>> prepareStartupGroupsPerConnectedComponent(Network network) {
+    private static Map<Component, List<GeneratorState>> prepareStartupGroupsPerConnectedComponent(Network network) {
         Map<Component, List<GeneratorState>> startupGroupsPerConnectedComponent = new HashMap<>();
         network.getGeneratorStream().forEach(generator -> {
             GeneratorState startupGenerator = new GeneratorState(false, 0, 0, false, generator);
@@ -106,7 +97,7 @@ public class GeneratorsStartupHypothesis {
         return startupGroupsPerConnectedComponent;
     }
 
-    private void economicPrecedence(StartupArea startupArea) {
+    private static void economicPrecedence(StartupArea startupArea, List<Generator> startupGeneratorsAtMaxActivePower) {
         // evaluate available production
         double pMaxAvailable = startupArea.evaluateGeneration(startupGeneratorsAtMaxActivePower);
 
@@ -135,10 +126,10 @@ public class GeneratorsStartupHypothesis {
         double requiredActivePower = startupArea.getTotalConsumption() - startupArea.getTotalPlannedActivePower();
         LOGGER.info("Required active power generation of {} MW for area {}", requiredActivePower, startupArea.getName());
 
-        updateGeneratorActivePowerSetpoints(startupArea, requiredActivePower);
+        updateGeneratorActivePowerSetpoints(startupArea, requiredActivePower, startupGeneratorsAtMaxActivePower);
     }
 
-    private void updateGeneratorActivePowerSetpoints(StartupArea startupArea, double requiredActivePower) {
+    private static void updateGeneratorActivePowerSetpoints(StartupArea startupArea, double requiredActivePower, List<Generator> startupGeneratorsAtMaxActivePower) {
         double activePowerToBeStarted = requiredActivePower;
 
         for (GeneratorState startupGenerator : startupArea.getStartupGenerators()) {

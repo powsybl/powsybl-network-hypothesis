@@ -25,8 +25,7 @@ public class GeneratorsStartupAlgorithmTest {
         Network network = createTestNetwork();
         assertEquals(4, network.getGeneratorCount());
         assertEquals(3, network.getLoadCount());
-        GeneratorsStartupHypothesis generatorsStartupHypothesis = new GeneratorsStartupHypothesis();
-        generatorsStartupHypothesis.apply(network, StartupMarginalGeneratorType.BASIC, 0.02, 0, 0, new ArrayList<>());
+        SteadyStateHypothesisUtils.startUpGenerators(network, StartupMarginalGeneratorType.BASIC, 0.02, 0, 0, new ArrayList<>());
 
         assertEquals(76.95, network.getGenerator("G1").getTargetP(), 0.001);
         assertEquals(76.95, network.getGenerator("G2").getTargetP(), 0.001);
@@ -41,8 +40,7 @@ public class GeneratorsStartupAlgorithmTest {
         List<Generator> startupGroupsPowerMax = new ArrayList<>();
         startupGroupsPowerMax.add(network.getGenerator("G3"));
 
-        GeneratorsStartupHypothesis generatorsStartupHypothesis = new GeneratorsStartupHypothesis();
-        generatorsStartupHypothesis.apply(network, StartupMarginalGeneratorType.BASIC, 0.1, 0.02, 0, startupGroupsPowerMax);
+        SteadyStateHypothesisUtils.startUpGenerators(network, StartupMarginalGeneratorType.BASIC, 0.1, 0.02, 0, startupGroupsPowerMax);
 
         assertEquals(76.95, network.getGenerator("G1").getTargetP(), 0.001);
         assertEquals(76.95, network.getGenerator("G2").getTargetP(), 0.001);
@@ -55,8 +53,7 @@ public class GeneratorsStartupAlgorithmTest {
         Network network = createTestNetworkWithLoadsValue(200, 300, 400);
         assertEquals(4, network.getGeneratorCount());
         assertEquals(3, network.getLoadCount());
-        GeneratorsStartupHypothesis generatorsStartupHypothesis = new GeneratorsStartupHypothesis();
-        generatorsStartupHypothesis.apply(network, StartupMarginalGeneratorType.BASIC, 0.1, 0.02, 0, new ArrayList<>());
+        SteadyStateHypothesisUtils.startUpGenerators(network, StartupMarginalGeneratorType.BASIC, 0.1, 0.02, 0, new ArrayList<>());
 
         // No generator is started
         assertEquals(0, network.getGenerator("G1").getTargetP(), 0.001);
