@@ -14,19 +14,20 @@ import com.powsybl.iidm.network.Generator;
  */
 public class GeneratorStartupImpl extends AbstractExtension<Generator> implements GeneratorStartup {
 
-    private float predefinedActivePowerSetpoint;
+    private double plannedActivePowerSetpoint;
 
-    private float startUpCost;
+    private double startUpCost;
 
-    private float marginalCost;
+    private double marginalCost;
 
-    private float plannedOutageRate;
+    private double plannedOutageRate;
 
-    private float forcedOutageRate;
+    private double forcedOutageRate;
 
-    public GeneratorStartupImpl(Generator generator, float predefinedActivePowerSetpoint, float startUpCost, float marginalCost, float plannedOutageRate, float forcedOutageRate) {
+    public GeneratorStartupImpl(Generator generator, double plannedActivePowerSetpoint, double startUpCost,
+                                double marginalCost, double plannedOutageRate, double forcedOutageRate) {
         super(generator);
-        this.predefinedActivePowerSetpoint = predefinedActivePowerSetpoint;
+        this.plannedActivePowerSetpoint = plannedActivePowerSetpoint;
         this.startUpCost = startUpCost;
         this.marginalCost = marginalCost;
         this.plannedOutageRate = plannedOutageRate;
@@ -34,56 +35,56 @@ public class GeneratorStartupImpl extends AbstractExtension<Generator> implement
     }
 
     @Override
-    public float getPredefinedActivePowerSetpoint() {
-        return predefinedActivePowerSetpoint;
+    public double getPlannedActivePowerSetpoint() {
+        return plannedActivePowerSetpoint;
     }
 
     @Override
-    public GeneratorStartupImpl setPredefinedActivePowerSetpoint(float predefinedActivePowerSetpoint) {
-        this.predefinedActivePowerSetpoint = predefinedActivePowerSetpoint;
+    public GeneratorStartupImpl setPlannedActivePowerSetpoint(double plannedActivePowerSetpoint) {
+        this.plannedActivePowerSetpoint = plannedActivePowerSetpoint;
         return this;
     }
 
     @Override
-    public float getStartUpCost() {
+    public double getStartupCost() {
         return startUpCost;
     }
 
     @Override
-    public GeneratorStartup setStartUpCost(float startUpCost) {
+    public GeneratorStartup setStartupCost(double startUpCost) {
         this.startUpCost = startUpCost;
         return this;
     }
 
     @Override
-    public float getMarginalCost() {
+    public double getMarginalCost() {
         return marginalCost;
     }
 
     @Override
-    public GeneratorStartupImpl setMarginalCost(float marginalCost) {
+    public GeneratorStartupImpl setMarginalCost(double marginalCost) {
         this.marginalCost = marginalCost;
         return this;
     }
 
     @Override
-    public float getPlannedOutageRate() {
+    public double getPlannedOutageRate() {
         return plannedOutageRate;
     }
 
     @Override
-    public GeneratorStartupImpl setPlannedOutageRate(float plannedOutageRate) {
+    public GeneratorStartupImpl setPlannedOutageRate(double plannedOutageRate) {
         this.plannedOutageRate = plannedOutageRate;
         return this;
     }
 
     @Override
-    public float getForcedOutageRate() {
+    public double getForcedOutageRate() {
         return forcedOutageRate;
     }
 
     @Override
-    public GeneratorStartupImpl setForcedOutageRate(float forcedOutageRate) {
+    public GeneratorStartupImpl setForcedOutageRate(double forcedOutageRate) {
         this.forcedOutageRate = forcedOutageRate;
         return this;
     }
