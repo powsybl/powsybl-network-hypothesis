@@ -19,23 +19,23 @@ public interface GeneratorStartup extends Extension<Generator> {
         return "startup";
     }
 
-    float getPredefinedActivePowerSetpoint();
+    double getPredefinedActivePowerSetpoint();
 
-    GeneratorStartup setPredefinedActivePowerSetpoint(float predefinedActivePowerSetpoint);
+    GeneratorStartup setPredefinedActivePowerSetpoint(double predefinedActivePowerSetpoint);
 
-    float getStartUpCost();
+    double getStartUpCost();
 
-    GeneratorStartup setStartUpCost(float startUpCost);
+    GeneratorStartup setStartUpCost(double startUpCost);
 
-    float getMarginalCost();
+    double getMarginalCost();
 
-    GeneratorStartup setMarginalCost(float marginalCost);
+    GeneratorStartup setMarginalCost(double marginalCost);
 
-    float getPlannedOutageRate();
+    double getPlannedOutageRate();
 
-    GeneratorStartup setPlannedOutageRate(float plannedOutageRate);
+    GeneratorStartup setPlannedOutageRate(double plannedOutageRate);
 
-    float getForcedOutageRate();
+    double getForcedOutageRate();
 
-    GeneratorStartup setForcedOutageRate(float forcedOutageRate);
+    GeneratorStartup setForcedOutageRate(double forcedOutageRate);
 }
