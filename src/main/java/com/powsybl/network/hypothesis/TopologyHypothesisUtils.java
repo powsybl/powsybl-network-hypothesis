@@ -109,9 +109,9 @@ public final class TopologyHypothesisUtils {
         VoltageLevel voltageLevel = substation.newVoltageLevel()
                 .setId(line.getId() + "_VL")
                 .setEnsureIdUnicity(true)
-                .setNominalV((line.getTerminal1().getVoltageLevel().getNominalV() + line.getTerminal2().getVoltageLevel().getNominalV()) / 2)
-                .setHighVoltageLimit(Math.max(line.getTerminal1().getVoltageLevel().getHighVoltageLimit(), line.getTerminal2().getVoltageLevel().getHighVoltageLimit()))
-                .setLowVoltageLimit(Math.min(line.getTerminal1().getVoltageLevel().getLowVoltageLimit(), line.getTerminal2().getVoltageLevel().getLowVoltageLimit()))
+                .setNominalV(line.getTerminal1().getVoltageLevel().getNominalV())
+                .setHighVoltageLimit(line.getTerminal1().getVoltageLevel().getHighVoltageLimit())
+                .setLowVoltageLimit(line.getTerminal1().getVoltageLevel().getLowVoltageLimit())
                 .setTopologyKind(topologyKind)
                 .setFictitious(true)
                 .add();
