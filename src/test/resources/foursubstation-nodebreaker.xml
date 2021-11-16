@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<iidm:network xmlns:iidm="http://www.powsybl.org/schema/iidm/1_6" id="fourSubstations" caseDate="2021-11-12T10:53:49.274+01:00" forecastDistance="0" sourceFormat="test">
+<iidm:network xmlns:iidm="http://www.powsybl.org/schema/iidm/1_5" id="fourSubstations" caseDate="2021-11-12T10:53:49.274+01:00" forecastDistance="0" sourceFormat="test">
     <iidm:substation id="S1">
         <iidm:voltageLevel id="S1VL1" nominalV="225.0" lowVoltageLimit="220.0" highVoltageLimit="240.0" topologyKind="NODE_BREAKER">
             <iidm:nodeBreakerTopology>
