@@ -11,6 +11,7 @@ import com.powsybl.iidm.network.Generator;
 import com.powsybl.iidm.network.Load;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.iidm.network.test.EurostagTutorialExample1Factory;
+import com.powsybl.iidm.network.test.FourSubstationsNodeBreakerFactory;
 import com.powsybl.iidm.xml.NetworkXml;
 import org.joda.time.DateTime;
 import org.junit.Test;
@@ -43,4 +44,16 @@ public class HvdcHypothesisTest extends AbstractConverterTest {
         HvdcHypothesis.convertLoadsToHvdc(load1, load2);
         roundTripXmlTest(network, NetworkXml::writeAndValidate, NetworkXml::validateAndRead, "/eurostag-hvdc-loads.xml");
     }
+
+    @Test
+    public void testNodeBreaker() throws  IOException {
+        Network network = FourSubstationsNodeBreakerFactory.create();
+        network.setCaseDate(DateTime.parse("2021-11-12T10:53:49.274+01:00"));
+        Load load1 = network.getLoad("LD1");
+        Load load2 = network.getLoad("LD6");
+        load1.setP0(-load1.getP0());
+        HvdcHypothesis.convertLoadsToHvdc(load1, load2);
+        roundTripXmlTest(network, NetworkXml::writeAndValidate, NetworkXml::validateAndRead, "/foursubstation-nodebreaker.xml");
+    }
+
 }
