@@ -24,7 +24,7 @@ public final class HvdcHypothesis {
     }
 
     public static void createHvdc(Generator generator1, Generator generator2) {
-        createHvdc(generator1, generator2, HvdcConverterStation.HvdcType.VSC);
+        createHvdc(generator1, getP(generator1), generator2, getP(generator2), HvdcConverterStation.HvdcType.VSC);
     }
 
     public static void convertLoadsToHvdc(Load load1, Load load2) {
@@ -34,58 +34,68 @@ public final class HvdcHypothesis {
     }
 
     public static void createHvdc(Load load1, Load load2) {
-        createHvdc(load1, load2, HvdcConverterStation.HvdcType.LCC);
+        createHvdc(load1, getP(load1), load2, getP(load2), HvdcConverterStation.HvdcType.LCC);
     }
 
     private static void disconnectInjection(Injection injection) {
         injection.getTerminal().disconnect();
     }
 
-    private static void createHvdc(Injection injection1, Injection injection2, HvdcConverterStation.HvdcType hvdcType) {
+    private static void createHvdc(Injection injection1, double p1, Injection injection2, double p2, HvdcConverterStation.HvdcType hvdcType) {
         VoltageLevel vl1 = injection1.getTerminal().getVoltageLevel();
         VoltageLevel vl2 = injection2.getTerminal().getVoltageLevel();
+
+        HvdcLine.ConvertersMode converterMode = converterMode(p1, p2);
+
+        double poleLossP1 = getPoleLossP(p1, p2, converterMode);
+        double poleLossP2 = getPoleLossP(p1, p2, converterMode);
+        double lossFactor1 = getLossFactor1(p1, poleLossP1, converterMode);
+        double lossFactor2 = getLossFactor2(p2, poleLossP2, converterMode);
+
         HvdcConverterStation converterStation1;
         HvdcConverterStation converterStation2;
         if (hvdcType.equals(HvdcConverterStation.HvdcType.VSC)) {
-            converterStation1 = createVscConverterStation(vl1, (Generator) injection1);
-            converterStation2 = createVscConverterStation(vl2, (Generator) injection2);
+            converterStation1 = createVscConverterStation(vl1, (Generator) injection1, lossFactor1);
+            converterStation2 = createVscConverterStation(vl2, (Generator) injection2, lossFactor2);
         } else if (hvdcType.equals(HvdcConverterStation.HvdcType.LCC)) {
-            converterStation1 = createLccConverterStation(vl1, (Load) injection1);
-            converterStation2 = createLccConverterStation(vl2, (Load) injection2);
+            converterStation1 = createLccConverterStation(vl1, (Load) injection1, lossFactor1);
+            converterStation2 = createLccConverterStation(vl2, (Load) injection2, lossFactor2);
         } else {
             throw new AssertionError();
         }
         Network network = injection1.getNetwork();
+        double activePowerSetpoint = getActivePowerSetpoint(p1, p2, poleLossP1, poleLossP2, converterMode);
         HvdcLineAdder adder = network.newHvdcLine()
                 .setId(injection1.getId() + "_" + injection2.getId() + "_HVDC")
-                .setConvertersMode(HvdcLine.ConvertersMode.SIDE_1_RECTIFIER_SIDE_2_INVERTER)
+                .setConvertersMode(converterMode)
                 .setConverterStationId1(converterStation1.getId())
                 .setConverterStationId2(converterStation2.getId())
                 .setNominalV(vl1.getNominalV())
-                .setActivePowerSetpoint(0.0)
-                .setMaxP(0.0)
-                .setR(0.1);
+                .setActivePowerSetpoint(activePowerSetpoint)
+                .setMaxP(getDefaultMaxP(activePowerSetpoint))
+                .setR(getDefaultR(vl1.getNominalV()));
 
         adder.add();
     }
 
-    private static HvdcConverterStation createLccConverterStation(VoltageLevel vl, Load load) {
+    private static HvdcConverterStation createLccConverterStation(VoltageLevel vl, Load load, double lossFactor) {
         LccConverterStationAdder converterStationAdder = vl.newLccConverterStation()
                 .setId(load.getId() + "_LCC")
-                .setLossFactor(0.0f)
-                .setPowerFactor((float) DEFAULT_POWER_FACTOR);
+                .setLossFactor((float) lossFactor)
+                .setPowerFactor((float) getPowerFactor(load.getP0(), load.getQ0()));
 
         attachConverter(load.getTerminal(), converterStationAdder, (bus, adder) -> adder.setConnectableBus(bus.getId()), (bus, adder) -> adder.setBus(bus.getId()), (node, adder) -> adder.setNode(node));
         return converterStationAdder.add();
     }
 
-    private static VscConverterStation createVscConverterStation(VoltageLevel vl, Generator generator) {
+    private static VscConverterStation createVscConverterStation(VoltageLevel vl, Generator generator, double lossFactor) {
         VscConverterStationAdder converterStationAdder = vl.newVscConverterStation()
                 .setId(generator.getId() + "_VSC")
-                .setLossFactor(0.0f)
-                .setVoltageRegulatorOn(generator.isVoltageRegulatorOn())
+                .setLossFactor((float) lossFactor)
                 .setVoltageSetpoint(generator.getTargetV())
-                .setReactivePowerSetpoint(generator.getTargetQ());
+                .setReactivePowerSetpoint(generator.getTargetQ())
+                .setRegulatingTerminal(generator.getRegulatingTerminal())
+                .setVoltageRegulatorOn(generator.isVoltageRegulatorOn());
 
         attachConverter(generator.getTerminal(), converterStationAdder, (bus, adder) -> adder.setConnectableBus(bus.getId()), (bus, adder) -> adder.setBus(bus.getId()), (node, adder) -> adder.setNode(node));
         VscConverterStation converterStation = converterStationAdder.add();
@@ -130,10 +140,118 @@ public final class HvdcHypothesis {
             }
         } else if (terminal.getVoltageLevel().getTopologyKind() == TopologyKind.NODE_BREAKER) {
             int node = terminal.getNodeBreakerView().getNode();
-            nodeSetter.accept(node, adder);
+            int converterNode = createConverterNode(terminal);
+            terminal.getVoltageLevel().getNodeBreakerView().newInternalConnection()
+                    .setNode1(node)
+                    .setNode2(converterNode)
+                    .add();
+            nodeSetter.accept(converterNode, adder);
         } else {
             throw new AssertionError();
         }
+    }
+
+    private static int createConverterNode(Terminal terminal) {
+        return terminal.getVoltageLevel().getNodeBreakerView().getMaximumNodeIndex() + 1;
+    }
+
+    private static double getP(Load load) {
+        return load.getP0();
+    }
+
+    private static double getP(Generator generator) {
+        return generator.getTargetP();
+    }
+
+    private static HvdcLine.ConvertersMode converterMode(double p1, double p2) {
+        if (p1 > 0.0 && p2 < 0.0) {
+            return HvdcLine.ConvertersMode.SIDE_1_RECTIFIER_SIDE_2_INVERTER;
+        }
+        if (p1 < 0.0 && p2 > 0.0) {
+            return HvdcLine.ConvertersMode.SIDE_1_INVERTER_SIDE_2_RECTIFIER;
+        }
+        if (p1 < 0.0 && p2 < 0.0) {
+            throw new AssertionError();
+        }
+        if (p1 > 0.0 && p2 > 0.0) {
+            throw new AssertionError();
+        }
+        return HvdcLine.ConvertersMode.SIDE_1_RECTIFIER_SIDE_2_INVERTER;
+    }
+
+    private static double getDefaultR(double vNominal) {
+        double defaultR = 0.01;
+        double sb = 100.0;
+
+        return defaultR * vNominal * vNominal / sb;
+    }
+
+    private static double getDefaultMaxP(double activeSetpoint) {
+        return activeSetpoint * 1.2;
+    }
+
+    private static double getMaxP(double gen1MaxP, double gen2MaxP, double activeSetpoint) {
+        double maxP = gen1MaxP;
+        if (gen2MaxP > maxP) {
+            maxP = gen2MaxP;
+        }
+        if (activeSetpoint > maxP) {
+            maxP = activeSetpoint * 1.2;
+        }
+        return maxP;
+    }
+
+    private static double getPoleLossP(double p1, double p2, HvdcLine.ConvertersMode mode) {
+        if (mode.equals(HvdcLine.ConvertersMode.SIDE_1_RECTIFIER_SIDE_2_INVERTER)) {
+            return getPoleLossPrectifier(p1, p2);
+        } else if (mode.equals(HvdcLine.ConvertersMode.SIDE_1_INVERTER_SIDE_2_RECTIFIER)) {
+            return getPoleLossPinverter(p1, p2);
+        }
+        return 0.0;
+    }
+
+    // Same losses at both ends
+    private static double getPoleLossPrectifier(double pRectifier, double pInverter) {
+        return calculatePoleLossP(pRectifier, pInverter, 0.5);
+    }
+
+    private static double getPoleLossPinverter(double pInverter, double pRectifier) {
+        return calculatePoleLossP(pRectifier, pInverter, 1.0 - 0.5);
+    }
+
+    private static double calculatePoleLossP(double pRectifier, double pInverter, double factor) {
+        return (pRectifier - pInverter) * factor;
+    }
+
+    private static double getPowerFactor(double activePower, double reactivePower) {
+        return activePower / Math.hypot(activePower, reactivePower);
+    }
+
+    private static double getLossFactor1(double pAC1, double poleLossP1, HvdcLine.ConvertersMode mode) {
+        if (mode.equals(HvdcLine.ConvertersMode.SIDE_1_RECTIFIER_SIDE_2_INVERTER)) { // pAC1 > 0
+            return poleLossP1 / pAC1 * 100;
+        } else if (mode.equals(HvdcLine.ConvertersMode.SIDE_1_INVERTER_SIDE_2_RECTIFIER) && Math.abs(pAC1) + poleLossP1 != 0) { // pAC1 < 0
+            return poleLossP1 / (Math.abs(pAC1) + poleLossP1) * 100;
+        }
+        return 0.0;
+    }
+
+    private static double getLossFactor2(double pAC2, double poleLossP2, HvdcLine.ConvertersMode mode) {
+        if (mode.equals(HvdcLine.ConvertersMode.SIDE_1_INVERTER_SIDE_2_RECTIFIER)) { // pAC2 > 0
+            return poleLossP2 / pAC2 * 100;
+        } else if (mode.equals(HvdcLine.ConvertersMode.SIDE_1_RECTIFIER_SIDE_2_INVERTER) && Math.abs(pAC2) + poleLossP2 != 0) { // pAC2 < 0
+            return poleLossP2 / (Math.abs(pAC2) + poleLossP2) * 100;
+        }
+        return 0.0;
+    }
+
+    private static double getActivePowerSetpoint(double p1, double p2, double poleLossP1, double poleLossP2, HvdcLine.ConvertersMode converterMode) {
+        if (converterMode.equals(HvdcLine.ConvertersMode.SIDE_1_RECTIFIER_SIDE_2_INVERTER)) {
+            return p1 - poleLossP1;
+        } else if (converterMode.equals(HvdcLine.ConvertersMode.SIDE_1_INVERTER_SIDE_2_RECTIFIER)) {
+            return p2 - poleLossP2;
+        }
+        return 0.0;
     }
 
     private HvdcHypothesis() {

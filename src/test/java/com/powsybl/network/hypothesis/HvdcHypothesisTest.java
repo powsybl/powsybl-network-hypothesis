@@ -28,6 +28,7 @@ public class HvdcHypothesisTest extends AbstractConverterTest {
         network.setCaseDate(DateTime.parse("2021-11-12T10:53:49.274+01:00"));
         Generator gen1 = network.getGenerator("GEN");
         Generator gen2 = network.getGenerator("GEN2");
+        gen2.setTargetP(-gen2.getTargetP());
         HvdcHypothesis.convertGeneratorsToHvdc(gen1, gen2);
         roundTripXmlTest(network, NetworkXml::writeAndValidate, NetworkXml::validateAndRead, "/eurostag-hvdc-generators.xml");
     }
@@ -38,6 +39,7 @@ public class HvdcHypothesisTest extends AbstractConverterTest {
         network.setCaseDate(DateTime.parse("2021-11-12T10:53:49.274+01:00"));
         Load load1 = network.getLoad("LOAD");
         Load load2 = network.getLoad("LOAD2");
+        load2.setP0(-load2.getP0());
         HvdcHypothesis.convertLoadsToHvdc(load1, load2);
         roundTripXmlTest(network, NetworkXml::writeAndValidate, NetworkXml::validateAndRead, "/eurostag-hvdc-loads.xml");
     }
