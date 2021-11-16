@@ -15,8 +15,6 @@ import java.util.function.BiConsumer;
  */
 public final class HvdcHypothesis {
 
-    private static final double DEFAULT_POWER_FACTOR = 0.8;
-
     public static void convertGeneratorsToHvdc(Generator generator1, Generator generator2) {
         createHvdc(generator1, generator2);
         disconnectInjection(generator1);
@@ -37,11 +35,11 @@ public final class HvdcHypothesis {
         createHvdc(load1, getP(load1), load2, getP(load2), HvdcConverterStation.HvdcType.LCC);
     }
 
-    private static void disconnectInjection(Injection injection) {
+    private static void disconnectInjection(Injection<?> injection) {
         injection.getTerminal().disconnect();
     }
 
-    private static void createHvdc(Injection injection1, double p1, Injection injection2, double p2, HvdcConverterStation.HvdcType hvdcType) {
+    private static void createHvdc(Injection<?> injection1, double p1, Injection<?> injection2, double p2, HvdcConverterStation.HvdcType hvdcType) {
         VoltageLevel vl1 = injection1.getTerminal().getVoltageLevel();
         VoltageLevel vl2 = injection2.getTerminal().getVoltageLevel();
 
@@ -52,8 +50,8 @@ public final class HvdcHypothesis {
         double lossFactor1 = getLossFactor1(p1, poleLossP1, converterMode);
         double lossFactor2 = getLossFactor2(p2, poleLossP2, converterMode);
 
-        HvdcConverterStation converterStation1;
-        HvdcConverterStation converterStation2;
+        HvdcConverterStation<?> converterStation1;
+        HvdcConverterStation<?> converterStation2;
         if (hvdcType.equals(HvdcConverterStation.HvdcType.VSC)) {
             converterStation1 = createVscConverterStation(vl1, (Generator) injection1, lossFactor1);
             converterStation2 = createVscConverterStation(vl2, (Generator) injection2, lossFactor2);
@@ -72,13 +70,13 @@ public final class HvdcHypothesis {
                 .setConverterStationId2(converterStation2.getId())
                 .setNominalV(vl1.getNominalV())
                 .setActivePowerSetpoint(activePowerSetpoint)
-                .setMaxP(getDefaultMaxP(activePowerSetpoint))
+                .setMaxP(getMaxP(injection1, injection2, activePowerSetpoint))
                 .setR(getDefaultR(vl1.getNominalV()));
 
         adder.add();
     }
 
-    private static HvdcConverterStation createLccConverterStation(VoltageLevel vl, Load load, double lossFactor) {
+    private static HvdcConverterStation<?> createLccConverterStation(VoltageLevel vl, Load load, double lossFactor) {
         LccConverterStationAdder converterStationAdder = vl.newLccConverterStation()
                 .setId(load.getId() + "_LCC")
                 .setLossFactor((float) lossFactor)
@@ -130,8 +128,8 @@ public final class HvdcHypothesis {
         }
     }
 
-    private static void attachConverter(Terminal terminal, HvdcConverterStationAdder adder, BiConsumer<Bus, HvdcConverterStationAdder> connectableBusSetter,
-                                        BiConsumer<Bus, HvdcConverterStationAdder> busSetter, BiConsumer<Integer, HvdcConverterStationAdder> nodeSetter) {
+    private static void attachConverter(Terminal terminal, HvdcConverterStationAdder<?> adder, BiConsumer<Bus, HvdcConverterStationAdder<?>> connectableBusSetter,
+                                        BiConsumer<Bus, HvdcConverterStationAdder<?>> busSetter, BiConsumer<Integer, HvdcConverterStationAdder<?>> nodeSetter) {
         if (terminal.getVoltageLevel().getTopologyKind() == TopologyKind.BUS_BREAKER) {
             connectableBusSetter.accept(terminal.getBusBreakerView().getConnectableBus(), adder);
             Bus bus = terminal.getBusBreakerView().getBus();
@@ -184,6 +182,16 @@ public final class HvdcHypothesis {
         double sb = 100.0;
 
         return defaultR * vNominal * vNominal / sb;
+    }
+
+    private static double getMaxP(Injection<?> injection1, Injection<?> injection2, double activePowerSetpoint) {
+        if (injection1 instanceof Generator) {
+            return getMaxP(((Generator) injection1).getMaxP(), ((Generator) injection2).getMaxP(), activePowerSetpoint);
+        } else if (injection1 instanceof Load) {
+            return getDefaultMaxP(activePowerSetpoint);
+        } else {
+            throw new AssertionError();
+        }
     }
 
     private static double getDefaultMaxP(double activeSetpoint) {
