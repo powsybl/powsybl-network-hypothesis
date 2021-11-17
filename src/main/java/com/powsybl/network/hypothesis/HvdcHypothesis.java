@@ -80,7 +80,7 @@ public final class HvdcHypothesis {
         LccConverterStationAdder converterStationAdder = vl.newLccConverterStation()
                 .setId(load.getId() + "_LCC")
                 .setLossFactor((float) lossFactor)
-                .setPowerFactor((float) getPowerFactor(load.getP0(), load.getQ0()));
+                .setPowerFactor((float) getPowerFactor(getP(load), getQ(load)));
 
         attachConverter(load.getTerminal(), converterStationAdder, (bus, adder) -> adder.setConnectableBus(bus.getId()), (bus, adder) -> adder.setBus(bus.getId()), (node, adder) -> adder.setNode(node));
         return converterStationAdder.add();
@@ -155,6 +155,10 @@ public final class HvdcHypothesis {
 
     private static double getP(Load load) {
         return load.getP0();
+    }
+
+    private static double getQ(Load load) {
+        return load.getQ0();
     }
 
     private static double getP(Generator generator) {
