@@ -8,6 +8,7 @@ package com.powsybl.network.hypothesis;
 
 import com.powsybl.commons.AbstractConverterTest;
 import com.powsybl.iidm.network.Generator;
+import com.powsybl.iidm.network.HvdcLine;
 import com.powsybl.iidm.network.Load;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.iidm.network.test.EurostagTutorialExample1Factory;
@@ -65,5 +66,23 @@ public class HvdcHypothesisTest extends AbstractConverterTest {
         gen1.setTargetP(-gen1.getTargetP());
         HvdcHypothesis.convertGeneratorsToHvdc(gen1, gen2);
         roundTripXmlTest(network, NetworkXml::writeAndValidate, NetworkXml::validateAndRead, "/foursubstation-curve.xml");
+    }
+
+    @Test
+    public void testLoadsFromHvdc() throws  IOException {
+        Network network = FourSubstationsNodeBreakerFactory.create();
+        network.setCaseDate(DateTime.parse("2021-11-12T10:53:49.274+01:00"));
+        HvdcLine hvdcLine = network.getHvdcLine("HVDC2");
+        HvdcHypothesis.convertHvdcToLoads(hvdcLine);
+        roundTripXmlTest(network, NetworkXml::writeAndValidate, NetworkXml::validateAndRead, "/foursubstation-loads-hvdc.xml");
+    }
+
+    @Test
+    public void testGeneratorsFromHvdc() throws  IOException {
+        Network network = FourSubstationsNodeBreakerFactory.create();
+        network.setCaseDate(DateTime.parse("2021-11-12T10:53:49.274+01:00"));
+        HvdcLine hvdcLine = network.getHvdcLine("HVDC1");
+        HvdcHypothesis.convertHvdcToGenerators(hvdcLine);
+        roundTripXmlTest(network, NetworkXml::writeAndValidate, NetworkXml::validateAndRead, "/foursubstation-generators-hvdc.xml");
     }
 }
