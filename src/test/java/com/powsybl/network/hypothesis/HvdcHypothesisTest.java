@@ -48,6 +48,17 @@ public class HvdcHypothesisTest extends AbstractConverterTest {
     }
 
     @Test
+    public void testReactiveLimitsCurve() throws  IOException {
+        Network network = FourSubstationsNodeBreakerFactory.create();
+        network.setCaseDate(DateTime.parse("2021-11-12T10:53:49.274+01:00"));
+        Generator gen1 = network.getGenerator("GH1");
+        Generator gen2 = network.getGenerator("GH3");
+        gen1.setTargetP(-gen1.getTargetP());
+        HvdcHypothesis.convertGeneratorsToHvdc(gen1, gen2);
+        roundTripXmlTest(network, NetworkXml::writeAndValidate, NetworkXml::validateAndRead, "/foursubstation-curve.xml");
+    }
+
+    @Test
     public void testLoadsFromHvdc() throws  IOException {
         Network network = FourSubstationsNodeBreakerFactory.create();
         network.setCaseDate(DateTime.parse("2021-11-12T10:53:49.274+01:00"));
