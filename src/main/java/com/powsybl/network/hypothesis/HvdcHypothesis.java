@@ -44,10 +44,7 @@ public final class HvdcHypothesis {
     }
 
     private static boolean isHvdcToGenerators(HvdcLine hvdcLine) {
-        if (HvdcConverterStation.HvdcType.VSC.equals(hvdcLine.getConverterStation1().getHvdcType())) {
-            return true;
-        }
-        return false;
+        return HvdcConverterStation.HvdcType.VSC.equals(hvdcLine.getConverterStation1().getHvdcType());
     }
 
     private static void createHvdc(Generator generator1, Generator generator2) {
