@@ -88,7 +88,7 @@ public final class HvdcHypothesis {
                 .setLossFactor((float) lossFactor)
                 .setPowerFactor((float) getPowerFactor(getP(load), getQ(load)));
 
-        attachConverter(load.getTerminal(), converterStationAdder, (bus, adder) -> adder.setConnectableBus(bus.getId()), (bus, adder) -> adder.setBus(bus.getId()), (node, adder) -> adder.setNode(node));
+        attachInjection(load.getTerminal(), converterStationAdder, (bus, adder) -> adder.setConnectableBus(bus.getId()), (bus, adder) -> adder.setBus(bus.getId()), (node, adder) -> adder.setNode(node));
         return converterStationAdder.add();
     }
 
@@ -101,7 +101,7 @@ public final class HvdcHypothesis {
                 .setRegulatingTerminal(generator.getRegulatingTerminal())
                 .setVoltageRegulatorOn(generator.isVoltageRegulatorOn());
 
-        attachConverter(generator.getTerminal(), converterStationAdder, (bus, adder) -> adder.setConnectableBus(bus.getId()), (bus, adder) -> adder.setBus(bus.getId()), (node, adder) -> adder.setNode(node));
+        attachInjection(generator.getTerminal(), converterStationAdder, (bus, adder) -> adder.setConnectableBus(bus.getId()), (bus, adder) -> adder.setBus(bus.getId()), (node, adder) -> adder.setNode(node));
         VscConverterStation converterStation = converterStationAdder.add();
         addConverterReactiveLimits(converterStation, generator);
         return converterStation;
@@ -254,27 +254,6 @@ public final class HvdcHypothesis {
 
     private static void attachInjection(Terminal terminal, InjectionAdder<?> adder, BiConsumer<Bus, InjectionAdder<?>> connectableBusSetter,
                                         BiConsumer<Bus, InjectionAdder<?>> busSetter, BiConsumer<Integer, InjectionAdder<?>> nodeSetter) {
-        if (terminal.getVoltageLevel().getTopologyKind() == TopologyKind.BUS_BREAKER) {
-            connectableBusSetter.accept(terminal.getBusBreakerView().getConnectableBus(), adder);
-            Bus bus = terminal.getBusBreakerView().getBus();
-            if (bus != null) {
-                busSetter.accept(bus, adder);
-            }
-        } else if (terminal.getVoltageLevel().getTopologyKind() == TopologyKind.NODE_BREAKER) {
-            int node = terminal.getNodeBreakerView().getNode();
-            int converterNode = createConverterNode(terminal);
-            terminal.getVoltageLevel().getNodeBreakerView().newInternalConnection()
-                    .setNode1(node)
-                    .setNode2(converterNode)
-                    .add();
-            nodeSetter.accept(converterNode, adder);
-        } else {
-            throw new AssertionError();
-        }
-    }
-
-    private static void attachConverter(Terminal terminal, HvdcConverterStationAdder<?> adder, BiConsumer<Bus, HvdcConverterStationAdder<?>> connectableBusSetter,
-                                        BiConsumer<Bus, HvdcConverterStationAdder<?>> busSetter, BiConsumer<Integer, HvdcConverterStationAdder<?>> nodeSetter) {
         if (terminal.getVoltageLevel().getTopologyKind() == TopologyKind.BUS_BREAKER) {
             connectableBusSetter.accept(terminal.getBusBreakerView().getConnectableBus(), adder);
             Bus bus = terminal.getBusBreakerView().getBus();
