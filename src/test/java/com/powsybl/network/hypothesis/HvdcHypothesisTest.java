@@ -63,7 +63,7 @@ public class HvdcHypothesisTest extends AbstractConverterTest {
         Network network = FourSubstationsNodeBreakerFactory.create();
         network.setCaseDate(DateTime.parse("2021-11-12T10:53:49.274+01:00"));
         HvdcLine hvdcLine = network.getHvdcLine("HVDC2");
-        HvdcHypothesis.convertHvdcToLoads(hvdcLine);
+        HvdcHypothesis.convertHvdcToInjection(hvdcLine);
         roundTripXmlTest(network, NetworkXml::writeAndValidate, NetworkXml::validateAndRead, "/foursubstation-loads-hvdc.xml");
     }
 
@@ -72,7 +72,7 @@ public class HvdcHypothesisTest extends AbstractConverterTest {
         Network network = HvdcTestNetwork.createVsc();
         network.setCaseDate(DateTime.parse("2021-11-12T10:53:49.274+01:00"));
         HvdcLine hvdcLine = network.getHvdcLine("L");
-        HvdcHypothesis.convertHvdcToGenerators(hvdcLine);
+        HvdcHypothesis.convertHvdcToInjection(hvdcLine);
         roundTripXmlTest(network, NetworkXml::writeAndValidate, NetworkXml::validateAndRead, "/hvdcnetwrok-generators-hvdc.xml");
     }
 }

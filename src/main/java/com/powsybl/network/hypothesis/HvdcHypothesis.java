@@ -27,14 +27,27 @@ public final class HvdcHypothesis {
         disconnectInjection(load2);
     }
 
-    public static void convertHvdcToGenerators(HvdcLine hvdcLine) {
-        createTwoGenerators(hvdcLine);
+    public static void convertHvdcToInjection(HvdcLine hvdcLine) {
+        checkConverters(hvdcLine);
+        if (isHvdcToGenerators(hvdcLine)) {
+            createTwoGenerators(hvdcLine);
+        } else {
+            createTwoLoads(hvdcLine);
+        }
         disconnectHvdc(hvdcLine);
     }
 
-    public static void convertHvdcToLoads(HvdcLine hvdcLine) {
-        createTwoLoads(hvdcLine);
-        disconnectHvdc(hvdcLine);
+    private static void checkConverters(HvdcLine hvdcLine) {
+        if (!hvdcLine.getConverterStation1().getHvdcType().equals(hvdcLine.getConverterStation2().getHvdcType())) {
+            throw new AssertionError("It is not possible to convert HVDC with different type converters at each end");
+        }
+    }
+
+    private static boolean isHvdcToGenerators(HvdcLine hvdcLine) {
+        if (HvdcConverterStation.HvdcType.VSC.equals(hvdcLine.getConverterStation1().getHvdcType())) {
+            return true;
+        }
+        return false;
     }
 
     private static void createHvdc(Generator generator1, Generator generator2) {
