@@ -74,7 +74,7 @@
             <iidm:load id="LD2" loadType="UNDEFINED" p0="60.0" q0="5.0" node="13" p="60.0" q="5.0"/>
             <iidm:load id="LD3" loadType="UNDEFINED" p0="60.0" q0="5.0" node="15" p="60.0" q="5.0"/>
             <iidm:load id="LD4" loadType="UNDEFINED" p0="40.0" q0="5.0" node="17" p="40.0" q="5.0"/>
-            <iidm:load id="LCC1-Load" loadType="UNDEFINED" p0="80.88978768380751" q0="107.85304354867819" node="24"/>
+            <iidm:load id="LCC1-Load" loadType="UNDEFINED" p0="80.88978768380751" q0="107.85304354867819" node="24" p="80.88"/>
             <iidm:shunt id="SHUNT" sectionCount="1" voltageRegulatorOn="false" node="19" q="1920.0">
                 <iidm:shuntLinearModel bPerSection="-0.012" maximumSectionCount="1"/>
             </iidm:shunt>
@@ -175,7 +175,7 @@
                 </iidm:reactiveCapabilityCurve>
             </iidm:generator>
             <iidm:load id="LD5" loadType="UNDEFINED" p0="200.0" q0="5.0" node="4" p="200.0" q="5.0"/>
-            <iidm:load id="LCC2-Load" loadType="UNDEFINED" p0="-79.11999998092651" q0="-105.49332675801402" node="11"/>
+            <iidm:load id="LCC2-Load" loadType="UNDEFINED" p0="-79.11999998092651" q0="-105.49332675801402" node="11" p="-79.12"/>
             <iidm:lccConverterStation id="LCC2" name="LCC2" lossFactor="1.1" powerFactor="0.6" node="10" p="-79.12"/>
         </iidm:voltageLevel>
     </iidm:substation>

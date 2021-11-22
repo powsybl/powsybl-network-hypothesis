@@ -85,14 +85,14 @@
                     <iidm:point p="100.0" minQ="-550.0" maxQ="570.0"/>
                 </iidm:reactiveCapabilityCurve>
             </iidm:vscConverterStation>
-            <iidm:vscConverterStation id="GH1_VSC" voltageRegulatorOn="true" lossFactor="58.54293" voltageSetpoint="400.0" reactivePowerSetpoint="512.081" node="24">
+            <iidm:vscConverterStation id="GH1_VSC" voltageRegulatorOn="true" lossFactor="29.185179" voltageSetpoint="400.0" reactivePowerSetpoint="512.081" node="24" p="-85.357" q="-512.0814">
                 <iidm:reactiveCapabilityCurve>
                     <iidm:point p="0.0" minQ="-769.3" maxQ="860.0"/>
                     <iidm:point p="100.0" minQ="-864.55" maxQ="946.25"/>
                 </iidm:reactiveCapabilityCurve>
                 <iidm:regulatingTerminal id="GH1"/>
             </iidm:vscConverterStation>
-            <iidm:vscConverterStation id="GH3_VSC" voltageRegulatorOn="true" lossFactor="77.408264" voltageSetpoint="400.0" reactivePowerSetpoint="512.081" node="25">
+            <iidm:vscConverterStation id="GH3_VSC" voltageRegulatorOn="true" lossFactor="22.591738" voltageSetpoint="400.0" reactivePowerSetpoint="512.081" node="25" p="-155.714" q="-512.0814">
                 <iidm:reactiveCapabilityCurve>
                     <iidm:point p="0.0" minQ="-680.6" maxQ="688.1"/>
                     <iidm:point p="200.0" minQ="-681.725" maxQ="716.3500004"/>
@@ -217,5 +217,5 @@
     </iidm:line>
     <iidm:hvdcLine id="HVDC1" name="HVDC1" r="1.0" nominalV="400.0" convertersMode="SIDE_1_RECTIFIER_SIDE_2_INVERTER" activePowerSetpoint="10.0" maxP="300.0" converterStation1="VSC1" converterStation2="VSC2"/>
     <iidm:hvdcLine id="HVDC2" name="HVDC2" r="1.0" nominalV="400.0" convertersMode="SIDE_1_RECTIFIER_SIDE_2_INVERTER" activePowerSetpoint="80.0" maxP="300.0" converterStation1="LCC1" converterStation2="LCC2"/>
-    <iidm:hvdcLine id="GH1_GH3_HVDC" r="16.0" nominalV="400.0" convertersMode="SIDE_1_INVERTER_SIDE_2_RECTIFIER" activePowerSetpoint="35.1785" maxP="200.0" converterStation1="GH1_VSC" converterStation2="GH3_VSC"/>
+    <iidm:hvdcLine id="GH1_GH3_HVDC" r="16.0" nominalV="400.0" convertersMode="SIDE_1_INVERTER_SIDE_2_RECTIFIER" activePowerSetpoint="120.5355" maxP="200.0" converterStation1="GH1_VSC" converterStation2="GH3_VSC"/>
 </iidm:network>

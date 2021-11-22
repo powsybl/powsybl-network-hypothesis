@@ -8,7 +8,7 @@
             <iidm:generator id="GEN" energySource="OTHER" minP="-9999.99" maxP="9999.99" voltageRegulatorOn="true" targetP="607.0" targetV="24.5" targetQ="301.0" connectableBus="NGEN">
                 <iidm:minMaxReactiveLimits minQ="-9999.99" maxQ="9999.99"/>
             </iidm:generator>
-            <iidm:vscConverterStation id="GEN_VSC" voltageRegulatorOn="true" lossFactor="100.0" voltageSetpoint="24.5" reactivePowerSetpoint="301.0" bus="NGEN" connectableBus="NGEN">
+            <iidm:vscConverterStation id="GEN_VSC" voltageRegulatorOn="true" lossFactor="0.0" voltageSetpoint="24.5" reactivePowerSetpoint="301.0" bus="NGEN" connectableBus="NGEN">
                 <iidm:minMaxReactiveLimits minQ="-9999.99" maxQ="9999.99"/>
                 <iidm:regulatingTerminal id="GEN"/>
             </iidm:vscConverterStation>
@@ -59,7 +59,7 @@
             <iidm:shunt id="SHUNT" sectionCount="1" voltageRegulatorOn="false" connectableBus="NSHUNT">
                 <iidm:shuntLinearModel bPerSection="1.0E-5" maximumSectionCount="1"/>
             </iidm:shunt>
-            <iidm:vscConverterStation id="GEN2_VSC" voltageRegulatorOn="true" lossFactor="50.0" voltageSetpoint="24.5" reactivePowerSetpoint="301.0" bus="N1" connectableBus="N1">
+            <iidm:vscConverterStation id="GEN2_VSC" voltageRegulatorOn="true" lossFactor="0.0" voltageSetpoint="24.5" reactivePowerSetpoint="301.0" bus="N1" connectableBus="N1">
                 <iidm:minMaxReactiveLimits minQ="-1.7976931348623157E308" maxQ="1.7976931348623157E308"/>
                 <iidm:regulatingTerminal id="GEN2"/>
             </iidm:vscConverterStation>
@@ -67,5 +67,5 @@
     </iidm:substation>
     <iidm:line id="NHV1_NHV2_1" r="3.0" x="33.0" g1="0.0" b1="1.93E-4" g2="0.0" b2="1.93E-4" bus1="NHV1" connectableBus1="NHV1" voltageLevelId1="VLHV1" bus2="NHV2" connectableBus2="NHV2" voltageLevelId2="VLHV2"/>
     <iidm:line id="NHV1_NHV2_2" r="3.0" x="33.0" g1="0.0" b1="1.93E-4" g2="0.0" b2="1.93E-4" bus1="NHV1" connectableBus1="NHV1" voltageLevelId1="VLHV1" bus2="NHV2" connectableBus2="NHV2" voltageLevelId2="VLHV2"/>
-    <iidm:hvdcLine id="GEN_GEN2_HVDC" r="0.0576" nominalV="24.0" convertersMode="SIDE_1_RECTIFIER_SIDE_2_INVERTER" activePowerSetpoint="0.0" maxP="9999.99" converterStation1="GEN_VSC" converterStation2="GEN2_VSC"/>
+    <iidm:hvdcLine id="GEN_GEN2_HVDC" r="0.0576" nominalV="24.0" convertersMode="SIDE_1_RECTIFIER_SIDE_2_INVERTER" activePowerSetpoint="607.0" maxP="9999.99" converterStation1="GEN_VSC" converterStation2="GEN2_VSC"/>
 </iidm:network>
