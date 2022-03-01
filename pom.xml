@@ -60,7 +60,7 @@
 
     <properties>
         <autoservice.version>1.0-rc2</autoservice.version>
-        <guava.version>29.0-jre</guava.version>
+        <guava.version>30.0-jre</guava.version>
         <java.version>11</java.version>
         <jimfs.version>1.1</jimfs.version>
         <junit.version>4.13.1</junit.version>
